@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE — Counselor Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&display=swap');
+:root{--bg:#0a0d16;--surface:#0f1420;--card:#141928;--card2:#181f30;--border:#1e2a42;--border2:#283656;--accent:#5b8ef0;--accent2:#7c6ff7;--green:#22d3a5;--yellow:#f0b429;--red:#f06060;--purple:#a78bfa;--text:#e2e8f8;--muted:#4a5680;--muted2:#7a88b0;--font:'Inter',sans-serif;--serif:'Playfair Display',serif;--sw:240px;--th:58px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex}
+.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-nm{font-size:.95rem;font-weight:600}.logo-sb{font-size:.63rem;color:var(--muted);margin-top:1px}
+.user-chip{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.user-av{width:30px;height:30px;border-radius:50%;background:rgba(34,211,165,.12);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--green);flex-shrink:0}
+.user-nm{font-size:.8rem;font-weight:500}.user-rl{font-size:.66rem;color:var(--muted);margin-top:1px}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-sec{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 8px;margin:14px 0 5px}
+.nav-sec:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:.83rem;color:var(--muted2);border:none;background:none;font-family:var(--font);margin-bottom:2px;text-align:left;transition:all .15s;position:relative}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.on{background:rgba(34,211,165,.1);color:var(--green);border:1px solid rgba(34,211,165,.18)}
+.nav-btn .ic{font-size:15px;flex-shrink:0}
+.nbadge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;min-width:18px;text-align:center}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.logout{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:none;cursor:pointer;font-family:var(--font);font-size:.83rem;color:var(--muted2);transition:all .15s;text-align:left}
+.logout:hover{background:rgba(240,96,96,.1);color:var(--red)}
+.copy{font-size:.6rem;color:var(--muted);padding:6px 10px;line-height:1.6}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.tb-l{display:flex;align-items:center;gap:12px}
+.pg-title{font-family:var(--serif);font-size:1.1rem}
+.pg-tag{font-size:.68rem;padding:3px 10px;border-radius:99px;font-weight:500;background:rgba(34,211,165,.12);color:var(--green)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-date{font-size:.73rem;color:var(--muted)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;font-family:var(--font);font-size:.77rem;transition:all .15s}
+.tb-btn:hover{border-color:var(--border2);color:var(--text)}
+.content{flex:1;overflow-y:auto;padding:26px}
+.panel{display:none;animation:fadeUp .25s ease both}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sec-hd{margin-bottom:20px}
+.sec-title{font-family:var(--serif);font-size:1.5rem;color:var(--text);letter-spacing:-.3px}
+.sec-title em{font-style:italic;color:var(--green)}
+.sec-sub{font-size:.81rem;color:var(--muted2);margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.m-l{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.m-v{font-size:1.8rem;font-weight:500;line-height:1;color:var(--text)}
+.m-s{font-size:.7rem;color:var(--muted);margin-top:3px}
+.green{color:var(--green)}.blue{color:var(--accent)}.yellow{color:var(--yellow)}.red{color:var(--red)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:.87rem;font-weight:500;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.risk-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.rpill{text-align:center;padding:14px 8px;border-radius:12px;border:1px solid}
+.rpill.rh{background:rgba(240,96,96,.1);border-color:rgba(240,96,96,.2);color:var(--red)}
+.rpill.rm{background:rgba(240,180,41,.1);border-color:rgba(240,180,41,.2);color:var(--yellow)}
+.rpill.rl{background:rgba(34,211,165,.1);border-color:rgba(34,211,165,.2);color:var(--green)}
+.rn{font-size:1.8rem;font-weight:500;line-height:1}
+.rl2{font-size:.7rem;margin-top:3px;opacity:.85}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:rgba(240,96,96,.08);border:1px solid rgba(240,96,96,.18);border-radius:10px;margin-bottom:8px}
+.a-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+.a-text{font-size:.79rem;color:#f5a0a0;flex:1;line-height:1.45}
+.a-time{font-size:.68rem;color:var(--red);opacity:.75;white-space:nowrap}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:6px 10px;color:var(--muted);font-weight:500;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 10px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.81rem}
+.s-row:last-child{border-bottom:none}
+.s-l{color:var(--muted2)}.s-v{color:var(--text);text-align:right}
+.rb{display:inline-block;font-size:.68rem;padding:2px 8px;border-radius:99px;font-weight:500}
+.rb.HIGH{background:rgba(240,96,96,.12);color:var(--red)}.rb.MODERATE{background:rgba(240,180,41,.12);color:var(--yellow)}.rb.LOW{background:rgba(34,211,165,.12);color:var(--green)}
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-family:var(--font);font-size:.87rem;color:var(--text);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.ta{resize:none;height:80px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.7rem;color:var(--muted2);margin-bottom:5px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:9px;border:none;font-family:var(--font);font-size:.83rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:var(--card2);border:1px solid var(--border);color:var(--muted2)}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-d{background:rgba(240,96,96,.1);border:1px solid rgba(240,96,96,.2);color:var(--red)}
+.btn-d:hover{background:rgba(240,96,96,.18)}
+.btn-full{width:100%}
+.note-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.note-card:hover{border-color:var(--border2)}
+.note-meta{font-size:.68rem;color:var(--muted2);margin-bottom:5px}
+.note-msg{font-size:.81rem;color:var(--text);line-height:1.55}
+.note-acts{display:flex;gap:6px;margin-top:8px}
+.n-btn{font-size:.7rem;padding:3px 10px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;font-family:var(--font);color:var(--muted2);transition:all .15s}
+.n-btn:hover{color:var(--text);border-color:var(--border2)}
+.n-btn.del:hover{background:rgba(240,96,96,.1);color:var(--red);border-color:rgba(240,96,96,.2)}
+.notif-item{display:flex;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid var(--border);margin-bottom:7px;background:var(--card);transition:all .15s}
+.notif-item.unread{border-color:rgba(91,142,240,.25);background:rgba(91,142,240,.06)}
+.notif-body{flex:1;min-width:0}
+.n-title{font-size:.82rem;font-weight:500;margin-bottom:2px}
+.n-msg{font-size:.78rem;color:var(--muted2);line-height:1.4}
+.n-time{font-size:.67rem;color:var(--muted);margin-top:3px}
+.n-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;padding:2px 5px;border-radius:4px;transition:all .15s;flex-shrink:0}
+.n-del:hover{background:rgba(240,96,96,.1);color:var(--red)}
+.ch{position:relative;width:100%}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:420px;max-width:95vw}
+.modal-title{font-family:var(--serif);font-size:1.1rem;margin-bottom:18px}
+.modal-row{display:flex;gap:10px;margin-top:8px}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:.83rem;color:var(--text);z-index:999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeUp .3s ease}
+.toast.show{display:block}
+.toast.ok{border-color:rgba(34,211,165,.4);color:var(--green)}
+.toast.err{border-color:rgba(240,96,96,.4);color:var(--red)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media(max-width:900px){.g2,.g3,.g21{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="logo-row"><div class="logo-ico">🧠</div><div><div class="logo-nm">AEE Platform</div><div class="logo-sb">CSE307 · IUB · Group 05</div></div></div>
+    <div class="user-chip"><div class="user-av" id="sbAv">CO</div><div><div class="user-nm" id="sbNm">Counselor</div><div class="user-rl" id="sbRl">Counselor</div></div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Counselor Tools</div>
+    <button class="nav-btn on" onclick="go('overview',this)"><span class="ic">📊</span>Overview</button>
+    <button class="nav-btn"   onclick="go('alerts',this)"><span class="ic">⚠️</span>Risk Alerts <span class="nbadge" id="alertBadge">0</span></button>
+    <button class="nav-btn"   onclick="go('trends',this)"><span class="ic">📈</span>Mood Trends</button>
+    <button class="nav-btn"   onclick="go('guidance',this)"><span class="ic">📝</span>Guidance Notes</button>
+    <button class="nav-btn"   onclick="go('notifications',this)"><span class="ic">🔔</span>Notifications <span class="nbadge" id="notifBadge">0</span></button>
+    <div class="nav-sec">Reports</div>
+    <button class="nav-btn"   onclick="go('report',this)"><span class="ic">📋</span>Aggregated Report</button>
+  </nav>
+  <div class="sb-foot">
+    <button class="logout" onclick="logout()">🚪 Sign out</button>
+    <div class="copy">CSE307 · Section 01 · Group 05<br>Independent University, Bangladesh</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l"><div class="pg-title" id="pgTitle">Counselor Dashboard</div><span class="pg-tag">Advisory Access</span></div>
+    <div class="tb-r"><span class="tb-date" id="tbDate"></span><button class="tb-btn" onclick="logout()">← Logout</button></div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel on" id="p-overview">
+      <div class="sec-hd"><h2 class="sec-title">Counselor <em>overview</em></h2><p class="sec-sub">Anonymized student data only — no individual identifiers exposed</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Submissions</div><div class="m-v blue" id="ov-total">—</div><div class="m-s">all time</div></div>
+        <div class="metric"><div class="m-l">Avg Mood Score</div><div class="m-v green" id="ov-avg">—</div><div class="m-s">campus wide</div></div>
+        <div class="metric"><div class="m-l">High Risk Flags</div><div class="m-v red" id="ov-high">—</div><div class="m-s">needs attention</div></div>
+        <div class="metric"><div class="m-l">Moderate Risk</div><div class="m-v yellow" id="ov-mod">—</div><div class="m-s">monitoring</div></div>
+      </div>
+      <div class="risk-pills">
+        <div class="rpill rh"><div class="rn" id="rp-h">—</div><div class="rl2">High Risk</div></div>
+        <div class="rpill rm"><div class="rn" id="rp-m">—</div><div class="rl2">Moderate</div></div>
+        <div class="rpill rl"><div class="rn" id="rp-l">—</div><div class="rl2">Low Risk</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-title">📊 Risk Distribution</div><div class="ch" style="height:190px"><canvas id="riskChart"></canvas></div></div>
+        <div class="card"><div class="card-title">📈 Weekly Mood Trend</div><div class="ch" style="height:190px"><canvas id="weekChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="panel" id="p-alerts">
+      <div class="sec-hd"><h2 class="sec-title">High-Risk <em>alerts</em></h2><p class="sec-sub">Students flagged HIGH risk — shown by anonymous ID only</p></div>
+      <div class="card">
+        <div class="card-title">⚠️ Active Alerts <button class="btn btn-g" style="margin-left:auto;font-size:.72rem;padding:4px 10px" onclick="loadAlerts()">↺ Refresh</button></div>
+        <div id="alertsList"><p style="color:var(--muted);padding:20px;text-align:center">Loading…</p></div>
+      </div>
+    </div>
+
+    <!-- TRENDS -->
+    <div class="panel" id="p-trends">
+      <div class="sec-hd"><h2 class="sec-title">Mood <em>trends</em></h2><p class="sec-sub">Aggregated anonymized trend data from all students</p></div>
+      <div class="card" style="margin-bottom:16px"><div class="card-title">📈 Daily Average Mood (Last 7 Days)</div><div class="ch" style="height:220px"><canvas id="trendChart"></canvas></div></div>
+      <div class="g2">
+        <div class="card"><div class="card-title">📊 Risk Breakdown</div><div class="ch" style="height:180px"><canvas id="riskBreakChart"></canvas></div></div>
+        <div class="card">
+          <div class="card-title">📋 Recent Submissions</div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Time</th><th>Score</th><th>Risk</th></tr></thead><tbody id="recentTbody"><tr><td colspan="3" style="text-align:center;color:var(--muted);padding:14px">Loading…</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUIDANCE NOTES (full CRUD) -->
+    <div class="panel" id="p-guidance">
+      <div class="sec-hd"><h2 class="sec-title">Guidance <em>notes</em></h2><p class="sec-sub">Create and manage professional guidance — full CRUD operations</p></div>
+      <div class="g21">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">📝 All Notes <button class="btn btn-g" style="margin-left:auto;font-size:.72rem;padding:4px 10px" onclick="loadGuidance()">↺ Refresh</button></div>
+            <div id="guidanceList"><p style="color:var(--muted);padding:16px;text-align:center">Loading…</p></div>
+          </div>
+        </div>
+        <div class="card" style="align-self:start">
+          <div class="card-title">➕ New Note</div>
+          <div class="field"><label>Target Student (anonymous ID — optional)</label><input class="inp" id="gTarget" placeholder="e.g. anon_4f2a or leave blank"></div>
+          <div class="field"><label>Guidance message</label><textarea class="inp ta" id="gMsg" style="height:100px" placeholder="Write your professional guidance..."></textarea></div>
+          <button class="btn btn-p btn-full" onclick="createGuidance()">Submit Guidance →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="panel" id="p-notifications">
+      <div class="sec-hd"><h2 class="sec-title">System <em>notifications</em></h2><p class="sec-sub">Auto-generated alerts from the risk engine</p></div>
+      <div class="card">
+        <div class="card-title">🔔 All Notifications
+          <button class="btn btn-g" style="margin-left:auto;font-size:.72rem;padding:4px 10px" onclick="markAllRead()">Mark all read</button>
+          <button class="btn btn-g" style="font-size:.72rem;padding:4px 10px" onclick="loadNotifications()">↺ Refresh</button>
+        </div>
+        <div id="notifList"><p style="color:var(--muted);padding:20px;text-align:center">Loading…</p></div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="panel" id="p-report">
+      <div class="sec-hd"><h2 class="sec-title">Aggregated <em>report</em></h2><p class="sec-sub">Fully anonymized institutional data — no individual student identifiable</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Submissions</div><div class="m-v" id="rep-total">—</div></div>
+        <div class="metric"><div class="m-l">Avg Mood Score</div><div class="m-v green" id="rep-avg">—</div></div>
+        <div class="metric"><div class="m-l">High Risk</div><div class="m-v red" id="rep-high">—</div></div>
+        <div class="metric"><div class="m-l">Moderate Risk</div><div class="m-v yellow" id="rep-mod">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Report Details</div>
+        <div class="s-row"><span class="s-l">Total check-ins</span><span class="s-v" id="rd-total">—</span></div>
+        <div class="s-row"><span class="s-l">Average mood score</span><span class="s-v" id="rd-avg">—</span></div>
+        <div class="s-row"><span class="s-l">HIGH risk flags</span><span class="s-v" style="color:var(--red)" id="rd-high">—</span></div>
+        <div class="s-row"><span class="s-l">MODERATE risk flags</span><span class="s-v" style="color:var(--yellow)" id="rd-mod">—</span></div>
+        <div class="s-row"><span class="s-l">LOW risk (healthy)</span><span class="s-v" style="color:var(--green)" id="rd-low">—</span></div>
+        <div class="s-row"><span class="s-l">Privacy compliance</span><span class="s-v" style="color:var(--green)">100% anonymized ✓</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDIT GUIDANCE MODAL -->
+<div class="modal-bg" id="gEditModal">
+  <div class="modal">
+    <div class="modal-title">Edit Guidance Note</div>
+    <input type="hidden" id="gEditId">
+    <div class="field"><label>Target Student (anonymous ID)</label><input class="inp" id="gEditTarget" placeholder="Leave blank for general"></div>
+    <div class="field"><label>Message</label><textarea class="inp ta" id="gEditMsg"></textarea></div>
+    <div class="modal-row">
+      <button class="btn btn-p" style="flex:1" onclick="saveGuidance()">Save</button>
+      <button class="btn btn-g" style="flex:1" onclick="closeModal('gEditModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const API   = 'http://localhost:8000';
+const token = () => localStorage.getItem('aee_token');
+if (!token()) window.location.href = '/ui/login';
+
+const TITLES = {overview:'Counselor Dashboard',alerts:'Risk Alerts',trends:'Mood Trends',guidance:'Guidance Notes',notifications:'Notifications',report:'Aggregated Report'};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nm = localStorage.getItem('aee_name') || localStorage.getItem('aee_email') || 'Counselor';
+  document.getElementById('sbNm').textContent  = nm;
+  document.getElementById('sbAv').textContent  = nm.slice(0,2).toUpperCase();
+  document.getElementById('sbRl').textContent  = localStorage.getItem('aee_role') || 'counselor';
+  document.getElementById('tbDate').textContent = new Date().toLocaleDateString('en-BD',{weekday:'short',month:'short',day:'numeric'});
+  loadOverview(); loadAlerts(); loadTrends(); loadGuidance(); loadNotifications(); loadReport();
+});
+
+function go(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  document.getElementById('pgTitle').textContent = TITLES[id]||id;
+}
+
+async function req(method, path, body=null) {
+  const opts = {method, headers:{'Authorization':'Bearer '+token(),'Content-Type':'application/json'}};
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(API+path, opts);
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(data.detail||'Error '+res.status);
+  return data;
+}
+
+/* ── OVERVIEW → GET /reports/aggregated + /reports/weekly-trend ── */
+async function loadOverview() {
+  try {
+    const r = await req('GET','/reports/aggregated');
+    document.getElementById('ov-total').textContent = r.total_submissions;
+    document.getElementById('ov-avg').textContent   = r.average_mood_score;
+    document.getElementById('ov-high').textContent  = r.risk_distribution.HIGH;
+    document.getElementById('ov-mod').textContent   = r.risk_distribution.MODERATE;
+    document.getElementById('rp-h').textContent = r.risk_distribution.HIGH;
+    document.getElementById('rp-m').textContent = r.risk_distribution.MODERATE;
+    document.getElementById('rp-l').textContent = r.risk_distribution.LOW;
+    new Chart(document.getElementById('riskChart'),{type:'doughnut',
+      data:{labels:['High','Moderate','Low'],datasets:[{data:[r.risk_distribution.HIGH,r.risk_distribution.MODERATE,r.risk_distribution.LOW],backgroundColor:['#f06060','#f0b429','#22d3a5'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#7a88b0',font:{size:11},boxWidth:10}}}}});
+  } catch(e) { console.warn(e); }
+  try {
+    const w = await req('GET','/reports/weekly-trend');
+    const cols = w.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('weekChart'),{type:'bar',
+      data:{labels:w.map(d=>d.date.slice(5)),datasets:[{data:w.map(d=>d.average_mood),backgroundColor:cols,borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+  } catch {}
+}
+
+/* ── ALERTS → GET /counselor/alerts ── */
+async function loadAlerts() {
+  const el = document.getElementById('alertsList');
+  try {
+    const alerts = await req('GET','/counselor/alerts');
+    document.getElementById('alertBadge').textContent = alerts.length;
+    if (!alerts.length) { el.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center">No high-risk alerts currently ✓</p>'; return; }
+    el.innerHTML = alerts.map(a=>`
+      <div class="alert-item">
+        <span class="a-ico">⚠️</span>
+        <div class="a-text"><strong>${a.anonymous_id}</strong> — Score ${a.mood_score}/10 · ${a.result_summary}</div>
+        <span class="a-time">${fmtDate(a.timestamp)}</span>
+      </div>`).join('');
+  } catch(e) { el.innerHTML=`<p style="color:var(--red);padding:20px;text-align:center">${e.message}</p>`; }
+}
+
+/* ── TRENDS → GET /reports/weekly-trend + /mood/history ── */
+async function loadTrends() {
+  try {
+    const w = await req('GET','/reports/weekly-trend');
+    const cols = w.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('trendChart'),{type:'bar',
+      data:{labels:w.map(d=>d.date.slice(5)),datasets:[{data:w.map(d=>d.average_mood),backgroundColor:cols,borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+    const r = await req('GET','/reports/aggregated');
+    new Chart(document.getElementById('riskBreakChart'),{type:'doughnut',
+      data:{labels:['High','Moderate','Low'],datasets:[{data:[r.risk_distribution.HIGH,r.risk_distribution.MODERATE,r.risk_distribution.LOW],backgroundColor:['#f06060','#f0b429','#22d3a5'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#7a88b0',font:{size:11},boxWidth:10}}}}});
+    const rows = await req('GET','/mood/history?limit=10');
+    document.getElementById('recentTbody').innerHTML = rows.map(r=>`
+      <tr><td style="color:var(--muted2)">${fmtDate(r.timestamp)}</td>
+          <td><strong>${r.score}</strong>/10</td>
+          <td><span class="rb ${r.risk_level}">${r.risk_level}</span></td></tr>`).join('');
+  } catch(e) { console.warn(e); }
+}
+
+/* ── GUIDANCE CRUD ── */
+async function loadGuidance() {
+  const el = document.getElementById('guidanceList');
+  try {
+    const notes = await req('GET','/counselor/guidance');
+    if (!notes.length) { el.innerHTML='<p style="color:var(--muted);padding:16px;text-align:center">No guidance notes yet. Add one →</p>'; return; }
+    el.innerHTML = notes.map(n=>`
+      <div class="note-card">
+        <div class="note-meta">By <strong>${n.counselor_name||'You'}</strong> · ${fmtDate(n.created_at)}${n.student_anonymous_id?' · For: <strong>'+n.student_anonymous_id+'</strong>':' · General'}</div>
+        <div class="note-msg">${n.message}</div>
+        <div class="note-acts">
+          <button class="n-btn" onclick="openGEdit('${n.id}','${n.student_anonymous_id||''}','${n.message.replace(/'/g,"\\'")}')">Edit</button>
+          <button class="n-btn del" onclick="deleteGuidance('${n.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML=`<p style="color:var(--red);padding:16px">${e.message}</p>`; }
+}
+
+async function createGuidance() {
+  const msg = document.getElementById('gMsg').value.trim();
+  const tid = document.getElementById('gTarget').value.trim();
+  if (!msg) { showToast('Please enter a guidance message.','err'); return; }
+  try {
+    await req('POST','/counselor/guidance',{message:msg,student_anonymous_id:tid||null});
+    showToast('Guidance note saved!','ok');
+    document.getElementById('gMsg').value=''; document.getElementById('gTarget').value='';
+    loadGuidance();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+function openGEdit(id, target, msg) {
+  document.getElementById('gEditId').value     = id;
+  document.getElementById('gEditTarget').value = target;
+  document.getElementById('gEditMsg').value    = msg;
+  document.getElementById('gEditModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveGuidance() {
+  const id  = document.getElementById('gEditId').value;
+  const msg = document.getElementById('gEditMsg').value.trim();
+  const tid = document.getElementById('gEditTarget').value.trim();
+  try {
+    await req('PUT',`/counselor/guidance/${id}`,{message:msg,student_anonymous_id:tid||null});
+    showToast('Updated!','ok'); closeModal('gEditModal'); loadGuidance();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+async function deleteGuidance(id) {
+  if (!confirm('Delete this guidance note?')) return;
+  try { await req('DELETE',`/counselor/guidance/${id}`); showToast('Deleted.','ok'); loadGuidance(); }
+  catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── NOTIFICATIONS CRUD ── */
+async function loadNotifications() {
+  const el = document.getElementById('notifList');
+  try {
+    const notifs = await req('GET','/notifications/');
+    const unread = notifs.filter(n=>!n.is_read).length;
+    document.getElementById('notifBadge').textContent = unread;
+    if (!notifs.length) { el.innerHTML='<p style="color:var(--muted);padding:20px;text-align:center">No notifications.</p>'; return; }
+    el.innerHTML = notifs.map(n=>`
+      <div class="notif-item ${n.is_read?'':'unread'}">
+        <div class="notif-body">
+          <div class="n-title">${n.title}</div>
+          <div class="n-msg">${n.message}</div>
+          <div class="n-time">${fmtDate(n.created_at)}</div>
+        </div>
+        ${!n.is_read?`<button class="n-btn" onclick="markRead('${n.id}')">Mark read</button>`:''}
+        <button class="n-del" onclick="deleteNotif('${n.id}')">✕</button>
+      </div>`).join('');
+  } catch(e) { el.innerHTML=`<p style="color:var(--red);padding:16px">${e.message}</p>`; }
+}
+async function markRead(id) { try { await req('PUT',`/notifications/${id}/read`); loadNotifications(); } catch(e) { showToast(e.message,'err'); } }
+async function markAllRead() { try { await req('PUT','/notifications/read-all'); showToast('All marked read.','ok'); loadNotifications(); } catch(e) { showToast(e.message,'err'); } }
+async function deleteNotif(id) { try { await req('DELETE',`/notifications/${id}`); loadNotifications(); } catch(e) { showToast(e.message,'err'); } }
+
+/* ── REPORT → GET /reports/aggregated ── */
+async function loadReport() {
+  try {
+    const r = await req('GET','/reports/aggregated');
+    document.getElementById('rep-total').textContent = r.total_submissions;
+    document.getElementById('rep-avg').textContent   = r.average_mood_score;
+    document.getElementById('rep-high').textContent  = r.risk_distribution.HIGH;
+    document.getElementById('rep-mod').textContent   = r.risk_distribution.MODERATE;
+    document.getElementById('rd-total').textContent  = r.total_submissions;
+    document.getElementById('rd-avg').textContent    = r.average_mood_score+'/10';
+    document.getElementById('rd-high').textContent   = r.risk_distribution.HIGH;
+    document.getElementById('rd-mod').textContent    = r.risk_distribution.MODERATE;
+    document.getElementById('rd-low').textContent    = r.risk_distribution.LOW;
+  } catch(e) { console.warn(e); }
+}
+
+function fmtDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleString('en-BD',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function showToast(msg, type) { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type; clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',3000); }
+function logout() { localStorage.clear(); window.location.href='/ui/login'; }
+</script>
+</body>
+</html>

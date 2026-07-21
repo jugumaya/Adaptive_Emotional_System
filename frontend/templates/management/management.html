@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE — University Management Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&display=swap');
+:root{--bg:#0a0d16;--surface:#0f1420;--card:#141928;--card2:#181f30;--border:#1e2a42;--border2:#283656;--accent:#5b8ef0;--accent2:#7c6ff7;--green:#22d3a5;--yellow:#f0b429;--red:#f06060;--purple:#a78bfa;--text:#e2e8f8;--muted:#4a5680;--muted2:#7a88b0;--font:'Inter',sans-serif;--serif:'Playfair Display',serif;--sw:240px;--th:58px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex}
+/* SIDEBAR */
+.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--yellow),#e0944a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-nm{font-size:.95rem;font-weight:600}.logo-sb{font-size:.63rem;color:var(--muted);margin-top:1px}
+.user-chip{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.user-av{width:30px;height:30px;border-radius:50%;background:rgba(240,180,41,.15);border:1px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--yellow);flex-shrink:0}
+.user-nm{font-size:.8rem;font-weight:500}.user-rl{font-size:.66rem;color:var(--muted);margin-top:1px}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-sec{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 8px;margin:14px 0 5px}
+.nav-sec:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:.83rem;color:var(--muted2);border:none;background:none;font-family:var(--font);margin-bottom:2px;text-align:left;transition:all .15s}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.on{background:rgba(240,180,41,.1);color:var(--yellow);border:1px solid rgba(240,180,41,.18)}
+.nav-btn .ic{font-size:15px;flex-shrink:0}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.logout{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:none;cursor:pointer;font-family:var(--font);font-size:.83rem;color:var(--muted2);transition:all .15s;text-align:left}
+.logout:hover{background:rgba(240,96,96,.1);color:var(--red)}
+.copy{font-size:.6rem;color:var(--muted);padding:6px 10px;line-height:1.6}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.tb-l{display:flex;align-items:center;gap:12px}
+.pg-title{font-family:var(--serif);font-size:1.1rem}
+.pg-tag{font-size:.68rem;padding:3px 10px;border-radius:99px;font-weight:500;background:rgba(240,180,41,.12);color:var(--yellow)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-date{font-size:.73rem;color:var(--muted)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;font-family:var(--font);font-size:.77rem;transition:all .15s}
+.tb-btn:hover{border-color:var(--border2);color:var(--text)}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:26px}
+.panel{display:none;animation:fadeUp .25s ease both}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sec-hd{margin-bottom:20px}
+.sec-title{font-family:var(--serif);font-size:1.5rem;color:var(--text);letter-spacing:-.3px}
+.sec-title em{font-style:italic;color:var(--yellow)}
+.sec-sub{font-size:.81rem;color:var(--muted2);margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.metric:hover{border-color:var(--border2)}
+.m-l{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.m-v{font-size:1.8rem;font-weight:500;line-height:1;color:var(--text)}
+.m-s{font-size:.7rem;color:var(--muted);margin-top:3px}
+.green{color:var(--green)}.blue{color:var(--accent)}.yellow{color:var(--yellow)}.red{color:var(--red)}.purple{color:var(--purple)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:.87rem;font-weight:500;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.81rem}
+.s-row:last-child{border-bottom:none}
+.s-l{color:var(--muted2)}.s-v{color:var(--text);text-align:right}
+.rpill{text-align:center;padding:14px 8px;border-radius:12px;border:1px solid}
+.rpill.rh{background:rgba(240,96,96,.1);border-color:rgba(240,96,96,.2);color:var(--red)}
+.rpill.rm{background:rgba(240,180,41,.1);border-color:rgba(240,180,41,.2);color:var(--yellow)}
+.rpill.rl{background:rgba(34,211,165,.1);border-color:rgba(34,211,165,.2);color:var(--green)}
+.risk-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.rn{font-size:1.7rem;font-weight:500;line-height:1}
+.rl2{font-size:.7rem;margin-top:3px;opacity:.85}
+.ch{position:relative;width:100%}
+.prog{width:100%;height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:99px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:9px;border:none;font-family:var(--font);font-size:.83rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:var(--card2);border:1px solid var(--border);color:var(--muted2)}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-full{width:100%}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:7px 10px;color:var(--muted);font-weight:500;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 10px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.018)}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:.83rem;color:var(--text);z-index:999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeUp .3s ease}
+.toast.show{display:block}
+.toast.ok{border-color:rgba(34,211,165,.4);color:var(--green)}
+.toast.err{border-color:rgba(240,96,96,.4);color:var(--red)}
+.privacy-banner{background:rgba(34,211,165,.08);border:1px solid rgba(34,211,165,.2);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:.82rem;color:var(--green)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media(max-width:900px){.g2,.g3,.g21{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="logo-row"><div class="logo-ico">🏛️</div><div><div class="logo-nm">AEE Platform</div><div class="logo-sb">CSE307 · IUB · Group 05</div></div></div>
+    <div class="user-chip"><div class="user-av" id="sbAv">UM</div><div><div class="user-nm" id="sbNm">Management</div><div class="user-rl">University Management</div></div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Institutional View</div>
+    <button class="nav-btn on" onclick="go('overview',this)"><span class="ic">📊</span>Campus Overview</button>
+    <button class="nav-btn"   onclick="go('monthly',this)"><span class="ic">📅</span>Monthly Report</button>
+    <button class="nav-btn"   onclick="go('departments',this)"><span class="ic">🏫</span>Department Breakdown</button>
+    <button class="nav-btn"   onclick="go('trends',this)"><span class="ic">📈</span>Well-Being Trends</button>
+  </nav>
+  <div class="sb-foot">
+    <button class="logout" onclick="logout()">🚪 Sign out</button>
+    <div class="copy">CSE307 · Section 01 · Group 05<br>Independent University, Bangladesh</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l"><div class="pg-title" id="pgTitle">University Management</div><span class="pg-tag">Read-Only · Reports</span></div>
+    <div class="tb-r"><span class="tb-date" id="tbDate"></span><button class="tb-btn" onclick="logout()">← Logout</button></div>
+  </div>
+
+  <div class="content">
+
+    <div class="privacy-banner">🔒 All data shown here is fully anonymized and aggregated. No individual student is ever identifiable.</div>
+
+    <!-- OVERVIEW -->
+    <div class="panel on" id="p-overview">
+      <div class="sec-hd"><h2 class="sec-title">Campus <em>well-being overview</em></h2><p class="sec-sub">Institution-wide emotional health snapshot</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Students</div><div class="m-v blue" id="ov-students">—</div><div class="m-s">enrolled in AEE</div></div>
+        <div class="metric"><div class="m-l">Avg Campus Mood</div><div class="m-v green" id="ov-avg">—</div><div class="m-s">out of 10</div></div>
+        <div class="metric"><div class="m-l">Participation Rate</div><div class="m-v yellow" id="ov-part">—</div><div class="m-s">of students</div></div>
+        <div class="metric"><div class="m-l">Interventions Sent</div><div class="m-v purple" id="ov-iv">—</div><div class="m-s">total delivered</div></div>
+      </div>
+      <div class="risk-pills">
+        <div class="rpill rh"><div class="rn" id="rp-h">—</div><div class="rl2">High Risk</div></div>
+        <div class="rpill rm"><div class="rn" id="rp-m">—</div><div class="rl2">Moderate Risk</div></div>
+        <div class="rpill rl"><div class="rn" id="rp-l">—</div><div class="rl2">Low Risk</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-title">📊 Risk Distribution</div><div class="ch" style="height:190px"><canvas id="riskChart"></canvas></div></div>
+        <div class="card"><div class="card-title">📈 Weekly Mood Trend</div><div class="ch" style="height:190px"><canvas id="weekChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- MONTHLY REPORT -->
+    <div class="panel" id="p-monthly">
+      <div class="sec-hd"><h2 class="sec-title">Monthly <em>report</em></h2><p class="sec-sub">Detailed breakdown — last 30 days · auto-generated</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Submissions (30d)</div><div class="m-v blue" id="mo-subs">—</div></div>
+        <div class="metric"><div class="m-l">Avg Mood (30d)</div><div class="m-v green" id="mo-avg">—</div></div>
+        <div class="metric"><div class="m-l">High-Risk Flags</div><div class="m-v red" id="mo-high">—</div></div>
+        <div class="metric"><div class="m-l">Counselors Active</div><div class="m-v purple" id="mo-couns">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Report Details — <span id="mo-period">Last 30 days</span></div>
+        <div class="s-row"><span class="s-l">Total check-ins submitted</span><span class="s-v" id="mo-d-subs">—</span></div>
+        <div class="s-row"><span class="s-l">Average mood score</span><span class="s-v" id="mo-d-avg">—</span></div>
+        <div class="s-row"><span class="s-l">High-risk flags raised</span><span class="s-v" style="color:var(--red)" id="mo-d-high">—</span></div>
+        <div class="s-row"><span class="s-l">Micro-interventions delivered</span><span class="s-v" id="mo-d-iv">—</span></div>
+        <div class="s-row"><span class="s-l">Counselors/Advisors active</span><span class="s-v" id="mo-d-couns">—</span></div>
+        <div class="s-row"><span class="s-l">System uptime</span><span class="s-v" style="color:var(--green)" id="mo-d-uptime">—</span></div>
+        <div class="s-row"><span class="s-l">Data compliance</span><span class="s-v" style="color:var(--green)" id="mo-d-compliance">—</span></div>
+        <div class="s-row"><span class="s-l">Report generated</span><span class="s-v" id="mo-d-gen">—</span></div>
+      </div>
+      <button class="btn btn-p btn-full" style="margin-top:16px" onclick="downloadReport()">📥 Export Report (Demo)</button>
+    </div>
+
+    <!-- DEPARTMENTS -->
+    <div class="panel" id="p-departments">
+      <div class="sec-hd"><h2 class="sec-title">Department <em>breakdown</em></h2><p class="sec-sub">Average mood scores grouped by academic department</p></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🏫 Mood by Department</div>
+        <div class="ch" style="height:220px"><canvas id="deptChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Department Details</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Department</th><th>Avg Mood</th><th>Submissions</th><th>Status</th></tr></thead>
+            <tbody id="deptTbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRENDS -->
+    <div class="panel" id="p-trends">
+      <div class="sec-hd"><h2 class="sec-title">Well-being <em>trends</em></h2><p class="sec-sub">Long-term campus emotional health trajectory</p></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">📈 Weekly Mood Trend (Live Data)</div>
+        <div class="ch" style="height:220px"><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="card-title">✓ Privacy Compliance</div>
+          <div style="text-align:center;padding:10px 0">
+            <div style="font-size:2.2rem;font-weight:600;color:var(--green)">100%</div>
+            <div style="font-size:.78rem;color:var(--muted2);margin-top:4px">Fully Anonymized Data</div>
+          </div>
+          <div class="prog"><div class="pf" style="width:100%;background:var(--green)"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📊 System Uptime</div>
+          <div style="text-align:center;padding:10px 0">
+            <div style="font-size:2.2rem;font-weight:600;color:var(--accent)">99.2%</div>
+            <div style="font-size:.78rem;color:var(--muted2);margin-top:4px">This Month</div>
+          </div>
+          <div class="prog"><div class="pf" style="width:99.2%;background:var(--accent)"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🎯 Goal Progress</div>
+          <div style="text-align:center;padding:10px 0">
+            <div style="font-size:2.2rem;font-weight:600;color:var(--yellow)" id="goal-pct">—</div>
+            <div style="font-size:.78rem;color:var(--muted2);margin-top:4px">Students Engaged</div>
+          </div>
+          <div class="prog"><div class="pf" id="goal-bar" style="width:0%;background:var(--yellow)"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<div class="toast" id="toast"></div>
+<script>
+const API   = 'http://localhost:8000';
+const token = () => localStorage.getItem('aee_token');
+if (!token()) window.location.href = '/ui/login';
+
+const TITLES = {overview:'University Management',monthly:'Monthly Report',departments:'Department Breakdown',trends:'Well-Being Trends'};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nm = localStorage.getItem('aee_name') || localStorage.getItem('aee_email') || 'Management';
+  document.getElementById('sbNm').textContent  = nm;
+  document.getElementById('sbAv').textContent  = nm.slice(0,2).toUpperCase();
+  document.getElementById('tbDate').textContent = new Date().toLocaleDateString('en-BD',{weekday:'short',month:'short',day:'numeric'});
+  loadOverview(); loadMonthly(); loadDepartments(); loadTrends();
+});
+
+function go(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  document.getElementById('pgTitle').textContent = TITLES[id]||id;
+}
+
+async function req(method, path, body=null) {
+  const opts = {method, headers:{'Authorization':'Bearer '+token(),'Content-Type':'application/json'}};
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(API+path, opts);
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(data.detail||'Error '+res.status);
+  return data;
+}
+
+/* ── OVERVIEW → GET /management/summary ── */
+async function loadOverview() {
+  try {
+    const s = await req('GET','/management/summary');
+    document.getElementById('ov-students').textContent = s.total_students;
+    document.getElementById('ov-avg').textContent       = s.average_mood_score;
+    document.getElementById('ov-part').textContent      = s.participation_rate_percent+'%';
+    document.getElementById('ov-iv').textContent         = s.total_interventions_delivered;
+    document.getElementById('rp-h').textContent = s.risk_distribution.HIGH;
+    document.getElementById('rp-m').textContent = s.risk_distribution.MODERATE;
+    document.getElementById('rp-l').textContent = s.risk_distribution.LOW;
+
+    new Chart(document.getElementById('riskChart'),{type:'doughnut',
+      data:{labels:['High','Moderate','Low'],datasets:[{data:[s.risk_distribution.HIGH,s.risk_distribution.MODERATE,s.risk_distribution.LOW],backgroundColor:['#f06060','#f0b429','#22d3a5'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#7a88b0',font:{size:11},boxWidth:10}}}}});
+
+    const partPct = s.participation_rate_percent || 0;
+    document.getElementById('goal-pct').textContent = partPct+'%';
+    document.getElementById('goal-bar').style.width  = Math.min(partPct,100)+'%';
+  } catch(e) { console.warn(e); }
+
+  try {
+    const w = await req('GET','/reports/weekly-trend');
+    const cols = w.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('weekChart'),{type:'bar',
+      data:{labels:w.map(d=>d.date.slice(5)),datasets:[{data:w.map(d=>d.average_mood),backgroundColor:cols,borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+  } catch {}
+}
+
+/* ── MONTHLY REPORT → GET /management/monthly-report ── */
+async function loadMonthly() {
+  try {
+    const r = await req('GET','/management/monthly-report');
+    document.getElementById('mo-subs').textContent   = r.monthly_submissions;
+    document.getElementById('mo-avg').textContent    = r.monthly_average_mood;
+    document.getElementById('mo-high').textContent   = r.high_risk_flags;
+    document.getElementById('mo-couns').textContent  = r.counselors_advisors_active;
+    document.getElementById('mo-period').textContent = r.period;
+    document.getElementById('mo-d-subs').textContent  = r.monthly_submissions;
+    document.getElementById('mo-d-avg').textContent   = r.monthly_average_mood+'/10';
+    document.getElementById('mo-d-high').textContent  = r.high_risk_flags+' students';
+    document.getElementById('mo-d-iv').textContent    = r.interventions_delivered;
+    document.getElementById('mo-d-couns').textContent = r.counselors_advisors_active;
+    document.getElementById('mo-d-uptime').textContent = r.system_uptime_percent+'%';
+    document.getElementById('mo-d-compliance').textContent = r.data_compliance;
+    document.getElementById('mo-d-gen').textContent  = new Date(r.generated_at).toLocaleString('en-BD');
+  } catch(e) { console.warn(e); }
+}
+
+/* ── DEPARTMENTS → GET /management/departments ── */
+async function loadDepartments() {
+  const tb = document.getElementById('deptTbody');
+  try {
+    const depts = await req('GET','/management/departments');
+    if (!depts.length) {
+      tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No department data yet. Students need a department set + mood submissions.</td></tr>';
+      new Chart(document.getElementById('deptChart'),{type:'bar',
+        data:{labels:['No Data'],datasets:[{data:[0],backgroundColor:['#4a5680'],borderRadius:5}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{color:'#4a5680'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#7a88b0'},grid:{display:false}}}}});
+      return;
+    }
+    tb.innerHTML = depts.map(d=>`
+      <tr>
+        <td style="font-weight:500">${d.department}</td>
+        <td><strong style="color:${d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5'}">${d.average_mood}</strong>/10</td>
+        <td style="color:var(--muted2)">${d.submissions}</td>
+        <td><span style="font-size:.68rem;padding:2px 8px;border-radius:99px;font-weight:500;background:${d.average_mood<=3?'rgba(240,96,96,.12)':d.average_mood<=6?'rgba(240,180,41,.12)':'rgba(34,211,165,.12)'};color:${d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5'}">${d.average_mood<=3?'Needs Attention':d.average_mood<=6?'Monitoring':'Healthy'}</span></td>
+      </tr>`).join('');
+
+    const cols = depts.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('deptChart'),{type:'bar',
+      data:{labels:depts.map(d=>d.department),datasets:[{data:depts.map(d=>d.average_mood),backgroundColor:cols,borderRadius:5,borderSkipped:false}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{min:0,max:10,ticks:{color:'#4a5680'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#7a88b0'},grid:{display:false}}}}});
+  } catch(e) { tb.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--red);padding:20px">${e.message}</td></tr>`; }
+}
+
+/* ── TRENDS → GET /reports/weekly-trend ── */
+async function loadTrends() {
+  try {
+    const w = await req('GET','/reports/weekly-trend');
+    const cols = w.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('trendChart'),{type:'line',
+      data:{labels:w.map(d=>d.date),datasets:[{data:w.map(d=>d.average_mood),borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,.08)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#f0b429'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680'},grid:{color:'rgba(255,255,255,.04)'}},x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+  } catch(e) { console.warn(e); }
+}
+
+function downloadReport() { showToast('Report export requires backend file generation — connect ReportLab/openpyxl endpoint.','ok'); }
+function showToast(msg, type) { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type; clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',3500); }
+function logout() { localStorage.clear(); window.location.href='/ui/login'; }
+</script>
+</body>
+</html>
+

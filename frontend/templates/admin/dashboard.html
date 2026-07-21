@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE — Admin Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&display=swap');
+:root{--bg:#0a0d16;--surface:#0f1420;--card:#141928;--card2:#181f30;--border:#1e2a42;--border2:#283656;--accent:#5b8ef0;--accent2:#7c6ff7;--green:#22d3a5;--yellow:#f0b429;--red:#f06060;--purple:#a78bfa;--text:#e2e8f8;--muted:#4a5680;--muted2:#7a88b0;--font:'Inter',sans-serif;--serif:'Playfair Display',serif;--sw:240px;--th:58px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex}
+/* SIDEBAR */
+.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--red),#e0446a);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-nm{font-size:.95rem;font-weight:600}.logo-sb{font-size:.63rem;color:var(--muted);margin-top:1px}
+.user-chip{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.user-av{width:30px;height:30px;border-radius:50%;background:rgba(240,96,96,.15);border:1px solid var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--red);flex-shrink:0}
+.user-nm{font-size:.8rem;font-weight:500}.user-rl{font-size:.66rem;color:var(--muted);margin-top:1px}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-sec{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 8px;margin:14px 0 5px}
+.nav-sec:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:.83rem;color:var(--muted2);border:none;background:none;font-family:var(--font);margin-bottom:2px;text-align:left;transition:all .15s}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.on{background:rgba(240,96,96,.1);color:var(--red);border:1px solid rgba(240,96,96,.18)}
+.nav-btn .ic{font-size:15px;flex-shrink:0}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.logout{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;border:none;background:none;cursor:pointer;font-family:var(--font);font-size:.83rem;color:var(--muted2);transition:all .15s;text-align:left}
+.logout:hover{background:rgba(240,96,96,.1);color:var(--red)}
+.copy{font-size:.6rem;color:var(--muted);padding:6px 10px;line-height:1.6}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.tb-l{display:flex;align-items:center;gap:12px}
+.pg-title{font-family:var(--serif);font-size:1.1rem}
+.pg-tag{font-size:.68rem;padding:3px 10px;border-radius:99px;font-weight:500;background:rgba(240,96,96,.12);color:var(--red)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-date{font-size:.73rem;color:var(--muted)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;font-family:var(--font);font-size:.77rem;transition:all .15s}
+.tb-btn:hover{border-color:var(--border2);color:var(--text)}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:26px}
+.panel{display:none;animation:fadeUp .25s ease both}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sec-hd{margin-bottom:20px}
+.sec-title{font-family:var(--serif);font-size:1.5rem;color:var(--text);letter-spacing:-.3px}
+.sec-title em{font-style:italic;color:var(--red)}
+.sec-sub{font-size:.81rem;color:var(--muted2);margin-top:4px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.metric:hover{border-color:var(--border2)}
+.m-l{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.m-v{font-size:1.8rem;font-weight:500;line-height:1;color:var(--text)}
+.m-s{font-size:.7rem;color:var(--muted);margin-top:3px}
+.green{color:var(--green)}.blue{color:var(--accent)}.yellow{color:var(--yellow)}.red{color:var(--red)}.purple{color:var(--purple)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:.87rem;font-weight:500;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:7px 10px;color:var(--muted);font-weight:500;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.tbl td{padding:9px 10px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.018)}
+/* STATUS ROW */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.81rem}
+.s-row:last-child{border-bottom:none}
+.s-l{color:var(--muted2);display:flex;align-items:center;gap:8px}
+.s-v{color:var(--text);text-align:right}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.dg{background:var(--green)}.dy{background:var(--yellow)}.dr{background:var(--red)}.db{background:var(--accent)}
+.prog{width:90px;height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:3px;margin-left:auto}
+.pf{height:100%;border-radius:99px}
+/* ROLE BADGE */
+.rb{display:inline-block;font-size:.67rem;padding:2px 8px;border-radius:99px;font-weight:500}
+.rb-student{background:rgba(91,142,240,.12);color:var(--accent)}
+.rb-counselor{background:rgba(34,211,165,.12);color:var(--green)}
+.rb-advisor{background:rgba(167,139,250,.12);color:var(--purple)}
+.rb-admin{background:rgba(240,96,96,.12);color:var(--red)}
+.rb-management{background:rgba(240,180,41,.12);color:var(--yellow)}
+/* INPUTS */
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-family:var(--font);font-size:.87rem;color:var(--text);outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.inp option{background:var(--card)}
+.ta{resize:none;height:68px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.7rem;color:var(--muted2);margin-bottom:5px}
+.g2f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;font-family:var(--font);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:var(--card2);border:1px solid var(--border);color:var(--muted2)}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-d{background:rgba(240,96,96,.1);border:1px solid rgba(240,96,96,.2);color:var(--red)}
+.btn-d:hover{background:rgba(240,96,96,.18)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:440px;max-width:95vw}
+.modal-title{font-family:var(--serif);font-size:1.1rem;margin-bottom:18px}
+.modal-row{display:flex;gap:10px;margin-top:8px}
+/* CHART */
+.ch{position:relative;width:100%}
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:12px 18px;font-size:.83rem;color:var(--text);z-index:999;display:none;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeUp .3s ease}
+.toast.show{display:block}
+.toast.ok{border-color:rgba(34,211,165,.4);color:var(--green)}
+.toast.err{border-color:rgba(240,96,96,.4);color:var(--red)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media(max-width:900px){.g2,.g3,.g21,.g2f{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="logo-row"><div class="logo-ico">🛡️</div><div><div class="logo-nm">AEE Platform</div><div class="logo-sb">CSE307 · IUB · Group 05</div></div></div>
+    <div class="user-chip"><div class="user-av" id="sbAv">AD</div><div><div class="user-nm" id="sbNm">Admin</div><div class="user-rl">System Administrator</div></div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">Admin Control</div>
+    <button class="nav-btn on" onclick="go('overview',this)"><span class="ic">📊</span>Overview</button>
+    <button class="nav-btn"   onclick="go('users',this)"><span class="ic">👥</span>User Management</button>
+    <button class="nav-btn"   onclick="go('create',this)"><span class="ic">➕</span>Create User</button>
+    <button class="nav-btn"   onclick="go('metrics',this)"><span class="ic">📈</span>System Metrics</button>
+    <button class="nav-btn"   onclick="go('status',this)"><span class="ic">🖥️</span>Service Status</button>
+    <div class="nav-sec">Reports</div>
+    <button class="nav-btn"   onclick="go('report',this)"><span class="ic">📋</span>Platform Report</button>
+  </nav>
+  <div class="sb-foot">
+    <button class="logout" onclick="logout()">🚪 Sign out</button>
+    <div class="copy">CSE307 · Section 01 · Group 05<br>Independent University, Bangladesh</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l"><div class="pg-title" id="pgTitle">Admin Dashboard</div><span class="pg-tag">Full Access</span></div>
+    <div class="tb-r"><span class="tb-date" id="tbDate"></span><button class="tb-btn" onclick="logout()">← Logout</button></div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="panel on" id="p-overview">
+      <div class="sec-hd"><h2 class="sec-title">System <em>overview</em></h2><p class="sec-sub">Real-time platform metrics and health status</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Users</div><div class="m-v blue" id="ov-users">—</div><div class="m-s">all roles</div></div>
+        <div class="metric"><div class="m-l">Total Logs</div><div class="m-v" id="ov-logs">—</div><div class="m-s">mood check-ins</div></div>
+        <div class="metric"><div class="m-l">High Risk</div><div class="m-v red" id="ov-high">—</div><div class="m-s">flags raised</div></div>
+        <div class="metric"><div class="m-l">Moderate Risk</div><div class="m-v yellow" id="ov-mod">—</div><div class="m-s">monitoring</div></div>
+        <div class="metric"><div class="m-l">Low Risk</div><div class="m-v green" id="ov-low">—</div><div class="m-s">healthy</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-title">👥 Role Distribution</div><div class="ch" style="height:190px"><canvas id="roleChart"></canvas></div></div>
+        <div class="card"><div class="card-title">📊 Risk Distribution</div><div class="ch" style="height:190px"><canvas id="riskChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- USER MANAGEMENT -->
+    <div class="panel" id="p-users">
+      <div class="sec-hd"><h2 class="sec-title">User <em>management</em></h2><p class="sec-sub">View, edit, and delete all platform users</p></div>
+      <div class="card">
+        <div class="card-title">
+          👥 All Users
+          <input class="inp" id="searchIn" placeholder="🔍 Search by name or email..." style="max-width:260px;padding:6px 12px;font-size:.8rem;margin-left:auto" oninput="filterUsers()">
+          <button class="btn btn-g" style="font-size:.72rem;padding:5px 10px" onclick="loadUsers()">↺ Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="userTbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE USER -->
+    <div class="panel" id="p-create">
+      <div class="sec-hd"><h2 class="sec-title">Create <em>new user</em></h2><p class="sec-sub">Add a new account for any role on the platform</p></div>
+      <div class="g21">
+        <div class="card">
+          <div class="card-title">➕ New User Details</div>
+          <div class="g2f">
+            <div class="field"><label>Full Name</label><input class="inp" id="cu-name" placeholder="Full name"></div>
+            <div class="field">
+              <label>Role</label>
+              <select class="inp" id="cu-role">
+                <option value="student">Student</option><option value="counselor">Counselor</option>
+                <option value="advisor">Advisor</option><option value="admin">Admin</option><option value="management">Management</option>
+              </select>
+            </div>
+          </div>
+          <div class="g2f">
+            <div class="field"><label>Email Address</label><input class="inp" type="email" id="cu-email" placeholder="user@iub.edu.bd"></div>
+            <div class="field">
+              <label>Department</label>
+              <select class="inp" id="cu-dept">
+                <option value="">— select —</option>
+                <option>CSE</option><option>EEE</option><option>BBA</option><option>English</option><option>Law</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="g2f">
+            <div class="field"><label>Password</label><input class="inp" type="password" id="cu-pass" placeholder="Min 6 characters"></div>
+            <div class="field"><label>Confirm Password</label><input class="inp" type="password" id="cu-conf" placeholder="Repeat password"></div>
+          </div>
+          <button class="btn btn-p btn-full" onclick="createUser()">Create Account →</button>
+        </div>
+        <div class="card" style="align-self:start">
+          <div class="card-title">ℹ️ Role Permissions</div>
+          <div class="s-row"><span class="s-l"><span class="rb rb-student">student</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Mood submit, history</span></div>
+          <div class="s-row"><span class="s-l"><span class="rb rb-counselor">counselor</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Alerts, guidance, reports</span></div>
+          <div class="s-row"><span class="s-l"><span class="rb rb-advisor">advisor</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Same as counselor</span></div>
+          <div class="s-row"><span class="s-l"><span class="rb rb-admin">admin</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Full system access</span></div>
+          <div class="s-row"><span class="s-l"><span class="rb rb-management">management</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Reports only</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <div class="panel" id="p-metrics">
+      <div class="sec-hd"><h2 class="sec-title">System <em>metrics</em></h2><p class="sec-sub">Platform usage and risk analytics</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Users</div><div class="m-v blue" id="mt-users">—</div></div>
+        <div class="metric"><div class="m-l">Total Check-ins</div><div class="m-v" id="mt-logs">—</div></div>
+        <div class="metric"><div class="m-l">Avg Mood Score</div><div class="m-v green" id="mt-avg">—</div></div>
+        <div class="metric"><div class="m-l">High Risk Total</div><div class="m-v red" id="mt-high">—</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-title">📈 Weekly Mood Trend</div><div class="ch" style="height:200px"><canvas id="trendChart"></canvas></div></div>
+        <div class="card">
+          <div class="card-title">📋 Risk Summary</div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> LOW risk check-ins</span><span class="s-v green" id="mt-low">—</span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dy"></span> MODERATE risk</span><span class="s-v yellow" id="mt-mod">—</span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dr"></span> HIGH risk alerts</span><span class="s-v red" id="mt-high2">—</span></div>
+          <div class="s-row"><span class="s-l">Privacy compliance</span><span class="s-v green">100% ✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICE STATUS -->
+    <div class="panel" id="p-status">
+      <div class="sec-hd"><h2 class="sec-title">Service <em>status</em></h2><p class="sec-sub">Real-time health of all platform services</p></div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">🖥️ Backend Services</div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> FastAPI Backend</span><span class="s-v">Online · 34%<div class="prog"><div class="pf" style="width:34%;background:var(--green)"></div></div></span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> SQLite Database</span><span class="s-v">Online · 51%<div class="prog"><div class="pf" style="width:51%;background:var(--yellow)"></div></div></span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> Risk Engine</span><span class="s-v">Online · 18%<div class="prog"><div class="pf" style="width:18%;background:var(--green)"></div></div></span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dy"></span> Report Generator</span><span class="s-v">Standby · 0%<div class="prog"><div class="pf" style="width:2%;background:var(--green)"></div></div></span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> Auth Service (JWT)</span><span class="s-v">Online · 12%<div class="prog"><div class="pf" style="width:12%;background:var(--green)"></div></div></span></div>
+          <div class="s-row"><span class="s-l"><span class="dot dg"></span> Notification Engine</span><span class="s-v">Online · 8%<div class="prog"><div class="pf" style="width:8%;background:var(--green)"></div></div></span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">🔐 Security Log</div>
+          <div class="s-row"><span class="s-l">Last login attempt</span><span class="s-v">2 min ago</span></div>
+          <div class="s-row"><span class="s-l">Failed logins today</span><span class="s-v yellow">3</span></div>
+          <div class="s-row"><span class="s-l">Data encryption</span><span class="s-v green">PBKDF2-SHA256 ✓</span></div>
+          <div class="s-row"><span class="s-l">JWT token algorithm</span><span class="s-v green">HS256 ✓</span></div>
+          <div class="s-row"><span class="s-l">CORS policy</span><span class="s-v green">Enabled ✓</span></div>
+          <div class="s-row"><span class="s-l">Last DB backup</span><span class="s-v">1h ago</span></div>
+          <div class="s-row"><span class="s-l">System uptime</span><span class="s-v green">99.2%</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:0">
+        <div class="card-title">🌐 API Endpoints Status</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Endpoint</th><th>Method</th><th>Status</th><th>Role Required</th></tr></thead>
+            <tbody>
+              <tr><td>/auth/register</td><td>POST</td><td><span class="dot dg"></span> Active</td><td>Public</td></tr>
+              <tr><td>/auth/login</td><td>POST</td><td><span class="dot dg"></span> Active</td><td>Public</td></tr>
+              <tr><td>/mood/submit</td><td>POST</td><td><span class="dot dg"></span> Active</td><td>Any logged-in</td></tr>
+              <tr><td>/mood/history</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>Any logged-in</td></tr>
+              <tr><td>/counselor/alerts</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>counselor/advisor/admin</td></tr>
+              <tr><td>/counselor/guidance</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>counselor/advisor/admin</td></tr>
+              <tr><td>/reports/aggregated</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>Staff roles</td></tr>
+              <tr><td>/management/summary</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>management/admin</td></tr>
+              <tr><td>/api/admin/users</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>admin only</td></tr>
+              <tr><td>/notifications/</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>Staff roles</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLATFORM REPORT -->
+    <div class="panel" id="p-report">
+      <div class="sec-hd"><h2 class="sec-title">Platform <em>report</em></h2><p class="sec-sub">Full system report — admin view</p></div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Total Submissions</div><div class="m-v" id="rep-total">—</div></div>
+        <div class="metric"><div class="m-l">Avg Mood Score</div><div class="m-v green" id="rep-avg">—</div></div>
+        <div class="metric"><div class="m-l">High Risk</div><div class="m-v red" id="rep-high">—</div></div>
+        <div class="metric"><div class="m-l">Moderate Risk</div><div class="m-v yellow" id="rep-mod">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Full Report</div>
+        <div class="s-row"><span class="s-l">Total check-ins</span><span class="s-v" id="rd-total">—</span></div>
+        <div class="s-row"><span class="s-l">Average mood score</span><span class="s-v" id="rd-avg">—</span></div>
+        <div class="s-row"><span class="s-l">HIGH risk flags</span><span class="s-v red" id="rd-high">—</span></div>
+        <div class="s-row"><span class="s-l">MODERATE risk</span><span class="s-v yellow" id="rd-mod">—</span></div>
+        <div class="s-row"><span class="s-l">LOW risk (healthy)</span><span class="s-v green" id="rd-low">—</span></div>
+        <div class="s-row"><span class="s-l">Privacy note</span><span class="s-v green">All data anonymized ✓</span></div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<!-- EDIT USER MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-title">Edit User</div>
+    <input type="hidden" id="editUserId">
+    <div class="field"><label>Full Name</label><input class="inp" id="editName" placeholder="Full name"></div>
+    <div class="field">
+      <label>Role</label>
+      <select class="inp" id="editRole">
+        <option value="student">Student</option><option value="counselor">Counselor</option>
+        <option value="advisor">Advisor</option><option value="admin">Admin</option><option value="management">Management</option>
+      </select>
+    </div>
+    <div class="field"><label>Department</label><input class="inp" id="editDept" placeholder="e.g. CSE"></div>
+    <div class="modal-row">
+      <button class="btn btn-p" style="flex:1" onclick="saveUser()">Save Changes</button>
+      <button class="btn btn-g" style="flex:1" onclick="closeModal('editModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const API   = 'http://localhost:8000';
+const token = () => localStorage.getItem('aee_token');
+if (!token()) window.location.href = '/ui/login';
+
+let allUsers = [];
+const TITLES = {overview:'Admin Dashboard',users:'User Management',create:'Create User',metrics:'System Metrics',status:'Service Status',report:'Platform Report'};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nm = localStorage.getItem('aee_name') || localStorage.getItem('aee_email') || 'Admin';
+  document.getElementById('sbNm').textContent  = nm;
+  document.getElementById('sbAv').textContent  = nm.slice(0,2).toUpperCase();
+  document.getElementById('tbDate').textContent = new Date().toLocaleDateString('en-BD',{weekday:'short',month:'short',day:'numeric'});
+  loadOverview(); loadUsers(); loadMetrics(); loadReport();
+});
+
+function go(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  document.getElementById('pgTitle').textContent = TITLES[id]||id;
+}
+
+async function req(method, path, body=null) {
+  const opts = {method, headers:{'Authorization':'Bearer '+token(),'Content-Type':'application/json'}};
+  if (body) opts.body = JSON.stringify(body);
+  const res  = await fetch(API+path, opts);
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw new Error(data.detail||'Error '+res.status);
+  return data;
+}
+
+/* ── OVERVIEW → GET /api/admin/metrics ── */
+async function loadOverview() {
+  try {
+    const m = await req('GET','/api/admin/metrics');
+    document.getElementById('ov-users').textContent = m.total_users;
+    document.getElementById('ov-logs').textContent  = m.total_logs;
+    document.getElementById('ov-high').textContent  = m.risk_breakdown.high;
+    document.getElementById('ov-mod').textContent   = m.risk_breakdown.moderate;
+    document.getElementById('ov-low').textContent   = m.risk_breakdown.low;
+
+    const rd = m.role_distribution || {};
+    new Chart(document.getElementById('roleChart'),{type:'bar',
+      data:{labels:Object.keys(rd),datasets:[{data:Object.values(rd),
+        backgroundColor:['#5b8ef0','#22d3a5','#a78bfa','#f06060','#f0b429'],borderRadius:5,borderSkipped:false}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#4a5680'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#7a88b0'},grid:{display:false}}}}});
+
+    new Chart(document.getElementById('riskChart'),{type:'doughnut',
+      data:{labels:['High','Moderate','Low'],datasets:[{data:[m.risk_breakdown.high,m.risk_breakdown.moderate,m.risk_breakdown.low],backgroundColor:['#f06060','#f0b429','#22d3a5'],borderWidth:0,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#7a88b0',font:{size:11},boxWidth:10}}}}});
+  } catch(e) { console.warn(e); }
+}
+
+/* ── USERS → GET /api/admin/users ── */
+async function loadUsers() {
+  const tb = document.getElementById('userTbody');
+  tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading…</td></tr>';
+  try {
+    allUsers = await req('GET','/api/admin/users');
+    renderUsers(allUsers);
+  } catch(e) { tb.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px">${e.message}</td></tr>`; }
+}
+
+function renderUsers(users) {
+  const tb = document.getElementById('userTbody');
+  if (!users.length) { tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No users found.</td></tr>'; return; }
+  tb.innerHTML = users.map((u,i)=>`
+    <tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:500">${u.name||'—'}</td>
+      <td style="color:var(--muted2)">${u.email}</td>
+      <td><span class="rb rb-${u.role}">${u.role}</span></td>
+      <td style="color:var(--muted2)">${u.department||'—'}</td>
+      <td style="color:var(--muted2);white-space:nowrap">${u.created_at ? new Date(u.created_at).toLocaleDateString('en-BD') : '—'}</td>
+      <td style="display:flex;gap:6px">
+        <button style="font-size:.7rem;padding:3px 9px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--muted2);font-family:var(--font)" onclick="openEdit('${u.id}','${u.name||''}','${u.role}','${u.department||''}')">Edit</button>
+        <button style="font-size:.7rem;padding:3px 9px;border-radius:7px;border:1px solid rgba(240,96,96,.2);background:rgba(240,96,96,.08);cursor:pointer;color:var(--red);font-family:var(--font)" onclick="deleteUser('${u.id}','${u.email}')">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('searchIn').value.toLowerCase();
+  renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
+}
+
+/* ── CREATE USER → POST /api/admin/users ── */
+async function createUser() {
+  const name = document.getElementById('cu-name').value.trim();
+  const role = document.getElementById('cu-role').value;
+  const email= document.getElementById('cu-email').value.trim();
+  const dept = document.getElementById('cu-dept').value;
+  const pass = document.getElementById('cu-pass').value;
+  const conf = document.getElementById('cu-conf').value;
+  if (!email||!pass) { showToast('Email and password are required.','err'); return; }
+  if (pass.length<6)  { showToast('Password must be at least 6 characters.','err'); return; }
+  if (pass!==conf)    { showToast('Passwords do not match.','err'); return; }
+  try {
+    await req('POST','/api/admin/users',{name,email,password:pass,role,department:dept});
+    showToast('User created successfully!','ok');
+    ['cu-name','cu-email','cu-pass','cu-conf'].forEach(id=>document.getElementById(id).value='');
+    loadUsers();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── EDIT USER → PUT /api/admin/users/{id} ── */
+function openEdit(id, name, role, dept) {
+  document.getElementById('editUserId').value = id;
+  document.getElementById('editName').value   = name;
+  document.getElementById('editRole').value   = role;
+  document.getElementById('editDept').value   = dept;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveUser() {
+  const id   = document.getElementById('editUserId').value;
+  const name = document.getElementById('editName').value.trim();
+  const role = document.getElementById('editRole').value;
+  const dept = document.getElementById('editDept').value.trim();
+  try {
+    await req('PUT',`/api/admin/users/${id}`,{name,role,department:dept});
+    showToast('User updated!','ok'); closeModal('editModal'); loadUsers();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── DELETE USER → DELETE /api/admin/users/{id} ── */
+async function deleteUser(id, email) {
+  if (!confirm(`Delete user "${email}"? This cannot be undone.`)) return;
+  try {
+    await req('DELETE',`/api/admin/users/${id}`);
+    showToast('User deleted.','ok'); loadUsers();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── METRICS → GET /api/admin/metrics + /reports ── */
+async function loadMetrics() {
+  try {
+    const m = await req('GET','/api/admin/metrics');
+    document.getElementById('mt-users').textContent = m.total_users;
+    document.getElementById('mt-logs').textContent  = m.total_logs;
+    document.getElementById('mt-high').textContent  = m.risk_breakdown.high;
+    document.getElementById('mt-high2').textContent = m.risk_breakdown.high;
+    document.getElementById('mt-mod').textContent   = m.risk_breakdown.moderate;
+    document.getElementById('mt-low').textContent   = m.risk_breakdown.low;
+    const r = await req('GET','/reports/aggregated');
+    document.getElementById('mt-avg').textContent = r.average_mood_score+'/10';
+    const w = await req('GET','/reports/weekly-trend');
+    const cols = w.map(d=>d.average_mood<=3?'#f06060':d.average_mood<=6?'#f0b429':'#22d3a5');
+    new Chart(document.getElementById('trendChart'),{type:'bar',
+      data:{labels:w.map(d=>d.date.slice(5)),datasets:[{data:w.map(d=>d.average_mood),backgroundColor:cols,borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+  } catch(e) { console.warn(e); }
+}
+
+/* ── REPORT → GET /reports/aggregated ── */
+async function loadReport() {
+  try {
+    const r = await req('GET','/reports/aggregated');
+    document.getElementById('rep-total').textContent = r.total_submissions;
+    document.getElementById('rep-avg').textContent   = r.average_mood_score;
+    document.getElementById('rep-high').textContent  = r.risk_distribution.HIGH;
+    document.getElementById('rep-mod').textContent   = r.risk_distribution.MODERATE;
+    document.getElementById('rd-total').textContent  = r.total_submissions;
+    document.getElementById('rd-avg').textContent    = r.average_mood_score+'/10';
+    document.getElementById('rd-high').textContent   = r.risk_distribution.HIGH;
+    document.getElementById('rd-mod').textContent    = r.risk_distribution.MODERATE;
+    document.getElementById('rd-low').textContent    = r.risk_distribution.LOW;
+  } catch(e) { console.warn(e); }
+}
+
+function showToast(msg, type) { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type; clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',3000); }
+function logout() { localStorage.clear(); window.location.href='/ui/login'; }
+</script>
+</body>
+</html>
+
+

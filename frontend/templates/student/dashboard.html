@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE — Student Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&display=swap');
+:root{
+  --bg:#0a0d16;--surface:#0f1420;--card:#141928;--card2:#181f30;--border:#1e2a42;--border2:#283656;
+  --accent:#5b8ef0;--accent2:#7c6ff7;--green:#22d3a5;--yellow:#f0b429;--red:#f06060;--purple:#a78bfa;
+  --text:#e2e8f8;--muted:#4a5680;--muted2:#7a88b0;--font:'Inter',sans-serif;--serif:'Playfair Display',serif;
+  --sw:240px;--th:58px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-top{padding:20px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-ico{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-nm{font-size:.95rem;font-weight:600;color:var(--text)}
+.logo-sb{font-size:.63rem;color:var(--muted);margin-top:1px}
+.user-chip{background:var(--card);border:1px solid var(--border);border-radius:11px;
+  padding:10px 12px;display:flex;align-items:center;gap:10px}
+.user-av{width:30px;height:30px;border-radius:50%;background:rgba(91,142,240,.15);
+  border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:var(--accent);flex-shrink:0}
+.user-nm{font-size:.8rem;font-weight:500;color:var(--text)}
+.user-rl{font-size:.66rem;color:var(--muted);margin-top:1px;text-transform:capitalize}
+.sb-nav{padding:14px 10px;flex:1}
+.nav-sec{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  padding:0 8px;margin:14px 0 5px}
+.nav-sec:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:9px;
+  cursor:pointer;font-size:.83rem;color:var(--muted2);border:none;background:none;
+  font-family:var(--font);margin-bottom:2px;text-align:left;transition:all .15s}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.on{background:rgba(91,142,240,.12);color:var(--accent);border:1px solid rgba(91,142,240,.2)}
+.nav-btn .ic{font-size:15px;flex-shrink:0}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.logout{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:9px;
+  border:none;background:none;cursor:pointer;font-family:var(--font);font-size:.83rem;
+  color:var(--muted2);transition:all .15s;text-align:left}
+.logout:hover{background:rgba(240,96,96,.1);color:var(--red)}
+.copy{font-size:.6rem;color:var(--muted);padding:6px 10px;line-height:1.6}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh}
+.topbar{height:var(--th);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.tb-l{display:flex;align-items:center;gap:12px}
+.pg-title{font-family:var(--serif);font-size:1.1rem;color:var(--text)}
+.pg-tag{font-size:.68rem;padding:3px 10px;border-radius:99px;font-weight:500}
+.tag-green{background:rgba(34,211,165,.12);color:var(--green)}
+.tag-blue{background:rgba(91,142,240,.12);color:var(--accent)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-date{font-size:.73rem;color:var(--muted)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;
+  border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;
+  font-family:var(--font);font-size:.77rem;transition:all .15s}
+.tb-btn:hover{border-color:var(--border2);color:var(--text)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:26px}
+.panel{display:none;animation:fadeUp .25s ease both}
+.panel.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.sec-hd{margin-bottom:20px}
+.sec-title{font-family:var(--serif);font-size:1.5rem;color:var(--text);letter-spacing:-.3px}
+.sec-title em{font-style:italic;color:var(--accent)}
+.sec-sub{font-size:.81rem;color:var(--muted2);margin-top:4px}
+
+/* OV STRIP */
+.ov{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.ov-item{text-align:center}
+.ov-l{font-size:.65rem;color:var(--muted);margin-bottom:3px}
+.ov-v{font-size:1rem;font-weight:500;color:var(--text)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.metric:hover{border-color:var(--border2)}
+.m-l{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.m-v{font-size:1.8rem;font-weight:500;line-height:1;color:var(--text)}
+.m-s{font-size:.7rem;color:var(--muted);margin-top:3px}
+.green{color:var(--green)}.blue{color:var(--accent)}.yellow{color:var(--yellow)}.red{color:var(--red)}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+.card:hover{border-color:var(--border2)}
+.card-title{font-size:.87rem;font-weight:500;color:var(--text);margin-bottom:14px;
+  display:flex;align-items:center;gap:7px}
+
+/* MOOD GRID */
+.mood-grid{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.mb{flex:1;min-width:30px;padding:7px 3px;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;text-align:center;font-family:var(--font);
+  font-size:.7rem;color:var(--muted2);transition:all .15s}
+.mb .mn{font-size:.95rem;font-weight:600;display:block;margin-bottom:1px}
+.mb:hover{border-color:var(--accent);color:var(--text)}
+.mb.sel{background:rgba(91,142,240,.15);border-color:var(--accent);color:var(--accent)}
+
+/* INPUT */
+.inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  padding:10px 13px;font-family:var(--font);font-size:.87rem;color:var(--text);
+  outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.ta{resize:none;height:68px}
+select.inp{height:36px;margin-bottom:10px}
+
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.7rem;color:var(--muted2);margin-bottom:5px}
+
+/* BUTTON */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;
+  border-radius:9px;border:none;font-family:var(--font);font-size:.83rem;font-weight:500;
+  cursor:pointer;transition:all .18s}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:var(--card2);border:1px solid var(--border);color:var(--muted2)}
+.btn-g:hover{border-color:var(--border2);color:var(--text)}
+.btn-d{background:rgba(240,96,96,.1);border:1px solid rgba(240,96,96,.2);color:var(--red)}
+.btn-d:hover{background:rgba(240,96,96,.18)}
+.btn-full{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* INTERVENTION */
+.iv{display:none;margin-top:12px;padding:11px 14px;font-size:.8rem;line-height:1.65;
+  border-radius:0 9px 9px 0;animation:fadeUp .3s ease}
+.iv.low{background:rgba(34,211,165,.1);border-left:3px solid var(--green);color:#4eeec5}
+.iv.moderate{background:rgba(240,180,41,.1);border-left:3px solid var(--yellow);color:#f5d47a}
+.iv.high{background:rgba(240,96,96,.1);border-left:3px solid var(--red);color:#f5a0a0}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;padding:6px 10px;color:var(--muted);font-weight:500;font-size:.68rem;
+  text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+.tbl td{padding:8px 10px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+
+/* STATUS ROW */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:.81rem}
+.s-row:last-child{border-bottom:none}
+.s-l{color:var(--muted2)}
+.s-v{color:var(--text);text-align:right}
+
+/* RISK BADGE */
+.rb{display:inline-block;font-size:.68rem;padding:2px 8px;border-radius:99px;font-weight:500}
+.rb.HIGH{background:rgba(240,96,96,.12);color:var(--red)}
+.rb.MODERATE{background:rgba(240,180,41,.12);color:var(--yellow)}
+.rb.LOW{background:rgba(34,211,165,.12);color:var(--green)}
+
+/* TIP BOX */
+.tip{background:rgba(91,142,240,.1);border:1px solid rgba(91,142,240,.2);border-radius:9px;
+  padding:11px 13px;font-size:.79rem;color:#93b4ff;line-height:1.65;margin-top:12px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;
+  align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:400px;max-width:95vw}
+.modal-title{font-family:var(--serif);font-size:1.1rem;margin-bottom:18px}
+.modal-row{display:flex;gap:10px;margin-top:6px}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card2);border:1px solid var(--border2);
+  border-radius:12px;padding:12px 18px;font-size:.83rem;color:var(--text);z-index:999;
+  display:none;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:fadeUp .3s ease}
+.toast.show{display:block}
+.toast.ok{border-color:rgba(34,211,165,.4);color:var(--green)}
+.toast.err{border-color:rgba(240,96,96,.4);color:var(--red)}
+
+/* CH WRAP */
+.ch{position:relative;width:100%}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+@media(max-width:900px){.g2,.g3,.g21{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.content{padding:16px}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="logo-row">
+      <div class="logo-ico">🧠</div>
+      <div><div class="logo-nm">AEE Platform</div><div class="logo-sb">CSE307 · IUB · Group 05</div></div>
+    </div>
+    <div class="user-chip">
+      <div class="user-av" id="sbAv">ST</div>
+      <div><div class="user-nm" id="sbNm">Student</div><div class="user-rl">Student</div></div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-sec">My Dashboard</div>
+    <button class="nav-btn on" onclick="go('checkin',this)"><span class="ic">😊</span>Mood Check-In</button>
+    <button class="nav-btn"   onclick="go('history',this)"><span class="ic">📈</span>My History</button>
+    <button class="nav-btn"   onclick="go('resources',this)"><span class="ic">💡</span>Resources</button>
+    <div class="nav-sec">Tools</div>
+    <button class="nav-btn"   onclick="go('breathing',this)"><span class="ic">🧘</span>Breathing Exercise</button>
+    <button class="nav-btn"   onclick="go('goals',this)"><span class="ic">🎯</span>Daily Goals</button>
+  </nav>
+  <div class="sb-foot">
+    <button class="logout" onclick="logout()">🚪 Sign out</button>
+    <div class="copy">CSE307 · Section 01 · Group 05<br>Independent University, Bangladesh</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-l">
+      <div class="pg-title" id="pgTitle">Mood Check-In</div>
+      <span class="pg-tag tag-green">Anonymous</span>
+    </div>
+    <div class="tb-r">
+      <span class="tb-date" id="tbDate"></span>
+      <button class="tb-btn" onclick="logout()">← Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- CHECKIN PANEL -->
+    <div class="panel on" id="p-checkin">
+      <div class="sec-hd">
+        <h2 class="sec-title">Good day, <em>how are you feeling?</em></h2>
+        <p class="sec-sub">Your responses are private, anonymous, and never clinically labeled.</p>
+      </div>
+
+      <div class="ov">
+        <div class="ov-item"><div class="ov-l">Last Score</div><div class="ov-v" id="ov-last">—</div></div>
+        <div class="ov-item"><div class="ov-l">Session Avg</div><div class="ov-v" id="ov-avg">—</div></div>
+        <div class="ov-item"><div class="ov-l">Risk Level</div><div class="ov-v" id="ov-risk" style="font-size:.82rem;padding-top:3px">—</div></div>
+        <div class="ov-item"><div class="ov-l">Check-ins</div><div class="ov-v" id="ov-cnt">0</div></div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-title">😊 Mood Check-In</div>
+          <p style="font-size:.76rem;color:var(--muted2);margin-bottom:10px">Rate your emotional state right now (1 = very low, 10 = excellent):</p>
+          <div class="mood-grid" id="moodGrid"></div>
+          <div class="field">
+            <label>Mood type (optional)</label>
+            <select class="inp" id="moodType" style="margin-bottom:0">
+              <option value="">— select type —</option>
+              <option>Happy</option><option>Anxious</option><option>Sad</option>
+              <option>Stressed</option><option>Calm</option><option>Excited</option><option>Tired</option>
+            </select>
+          </div>
+          <textarea class="inp ta" id="noteIn" placeholder="Optional notes about how you feel today..."></textarea>
+          <button class="btn btn-p btn-full" id="submitBtn" onclick="submitMood()" style="margin-top:8px">Submit Check-In →</button>
+          <div class="iv" id="ivBox"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📈 Session History</div>
+          <div class="ch" style="height:170px"><canvas id="sessChart"></canvas></div>
+          <div class="tip" id="tipBox">Loading daily tip...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="p-history">
+      <div class="sec-hd">
+        <h2 class="sec-title">My <em>mood history</em></h2>
+        <p class="sec-sub">Your personal check-in records — private and never shared individually</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">📊 Mood Trend</div>
+        <div class="ch" style="height:190px"><canvas id="histChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          📋 All Check-Ins
+          <button class="btn btn-g" style="margin-left:auto;font-size:.72rem;padding:4px 10px" onclick="loadHistory()">↺ Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>#</th><th>Date & Time</th><th>Score</th><th>Type</th><th>Risk</th><th>Notes</th><th>Actions</th></tr></thead>
+            <tbody id="histBody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOURCES PANEL -->
+    <div class="panel" id="p-resources">
+      <div class="sec-hd">
+        <h2 class="sec-title">Wellness <em>resources</em></h2>
+        <p class="sec-sub">Non-clinical self-help tools and guides for students</p>
+      </div>
+      <div class="g3">
+        <div class="card"><div class="card-title">🫁 Box Breathing</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">Inhale 4s → Hold 4s → Exhale 4s → Hold 4s. Repeat 3 times. Reduces anxiety in minutes.</p><div class="tip">Try it now in the Breathing Exercise tab!</div></div>
+        <div class="card"><div class="card-title">🎯 Pomodoro Focus</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">25 min of focused study + 5 min break. This cycle significantly reduces cognitive fatigue.</p><div class="tip">Use apps like Forest or Focusmate to stay on track.</div></div>
+        <div class="card"><div class="card-title">😴 Sleep Hygiene</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">7–9 hours of sleep directly improves emotional regulation, memory, and academic performance.</p><div class="tip">Avoid screens 30 minutes before bed for better rest.</div></div>
+        <div class="card"><div class="card-title">🏃 Physical Activity</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">20 minutes of walking releases endorphins that improve mood for up to 12 hours.</p></div>
+        <div class="card"><div class="card-title">📓 Journaling</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">Writing 5 minutes daily about your emotions builds self-awareness and reduces overthinking.</p></div>
+        <div class="card"><div class="card-title">💬 Reach Out</div><p style="font-size:.8rem;color:var(--muted2);line-height:1.7">Your university counselor provides non-clinical emotional support. You are not alone.</p><div class="tip">Contact: counselor@iub.edu.bd</div></div>
+      </div>
+    </div>
+
+    <!-- BREATHING PANEL -->
+    <div class="panel" id="p-breathing">
+      <div class="sec-hd">
+        <h2 class="sec-title">Breathing <em>exercise</em></h2>
+        <p class="sec-sub">A simple guided box-breathing session to calm anxiety</p>
+      </div>
+      <div class="g2">
+        <div class="card" style="text-align:center">
+          <div class="card-title" style="justify-content:center">🧘 Box Breathing Session</div>
+          <div id="breathCircle" style="width:160px;height:160px;border-radius:50%;
+            background:rgba(91,142,240,.1);border:3px solid var(--accent);
+            display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+            font-size:1rem;color:var(--accent);font-weight:500;transition:all 1s ease">
+            Press Start
+          </div>
+          <div id="breathPhase" style="font-size:.85rem;color:var(--muted2);margin-bottom:8px">—</div>
+          <div id="breathCount" style="font-size:2rem;font-weight:600;color:var(--text);margin-bottom:20px">—</div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn-p" id="breathBtn" onclick="toggleBreath()">▶ Start</button>
+            <button class="btn btn-g" onclick="resetBreath()">↺ Reset</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📖 How It Works</div>
+          <div class="s-row"><span class="s-l">Inhale</span><span class="s-v" style="color:var(--accent)">4 seconds</span></div>
+          <div class="s-row"><span class="s-l">Hold</span><span class="s-v" style="color:var(--purple)">4 seconds</span></div>
+          <div class="s-row"><span class="s-l">Exhale</span><span class="s-v" style="color:var(--green)">4 seconds</span></div>
+          <div class="s-row"><span class="s-l">Hold</span><span class="s-v" style="color:var(--yellow)">4 seconds</span></div>
+          <div class="s-row"><span class="s-l">Total cycles</span><span class="s-v">3 recommended</span></div>
+          <div class="tip" style="margin-top:14px">Box breathing activates your parasympathetic nervous system, reducing cortisol and calming anxiety within minutes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GOALS PANEL -->
+    <div class="panel" id="p-goals">
+      <div class="sec-hd">
+        <h2 class="sec-title">Daily <em>wellness goals</em></h2>
+        <p class="sec-sub">Track your emotional health habits each day</p>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="m-l">Check-ins Today</div><div class="m-v blue" id="g-cnt">0</div><div class="m-s">target: 1+</div></div>
+        <div class="metric"><div class="m-l">Last Mood Score</div><div class="m-v" id="g-score">—</div><div class="m-s">target: 6+</div></div>
+        <div class="metric"><div class="m-l">Breathing Done</div><div class="m-v" id="g-breath" style="font-size:1.1rem;margin-top:4px">—</div></div>
+        <div class="metric"><div class="m-l">Notes Written</div><div class="m-v" id="g-notes">0</div><div class="m-s">journal entries</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 Goal Checklist</div>
+        <div class="s-row"><span class="s-l">Complete daily mood check-in</span><span class="s-v" id="gc-1" style="color:var(--muted)">Not done</span></div>
+        <div class="s-row"><span class="s-l">Achieve mood score ≥ 6</span><span class="s-v" id="gc-2" style="color:var(--muted)">Pending</span></div>
+        <div class="s-row"><span class="s-l">Complete breathing exercise</span><span class="s-v" id="gc-3" style="color:var(--muted)">Not started</span></div>
+        <div class="s-row"><span class="s-l">Write mood notes</span><span class="s-v" id="gc-4" style="color:var(--muted)">0 entries</span></div>
+        <div class="s-row"><span class="s-l">Review wellness resources</span><span class="s-v" id="gc-5" style="color:var(--muted)">Not yet</span></div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-title">Edit Check-In</div>
+    <input type="hidden" id="editId">
+    <div class="field"><label>Mood Score (1–10)</label><input class="inp" type="number" id="editScore" min="1" max="10"></div>
+    <div class="field"><label>Notes</label><textarea class="inp ta" id="editNotes"></textarea></div>
+    <div class="modal-row">
+      <button class="btn btn-p" style="flex:1" onclick="saveEdit()">Save Changes</button>
+      <button class="btn btn-g" style="flex:1" onclick="closeModal('editModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── CONFIG ── */
+const API = 'http://localhost:8000';
+const token    = () => localStorage.getItem('aee_token');
+const userId   = () => localStorage.getItem('aee_user_id');
+const userName = () => localStorage.getItem('aee_name') || localStorage.getItem('aee_email') || 'Student';
+
+/* ── GUARD ── */
+if (!token()) { window.location.href = '/ui/login'; }
+
+/* ── STATE ── */
+let selScore = null, sessScores = [], sessCount = 0, notesCount = 0, breathDone = false;
+let sessChart = null, histChart = null, breathInterval = null, breathPhaseIdx = 0, breathSec = 4;
+const PHASES = ['Inhale','Hold','Exhale','Hold'];
+const PHASE_COLORS = ['#5b8ef0','#a78bfa','#22d3a5','#f0b429'];
+
+const TIPS = [
+  '💡 10 minutes of walking reduces cortisol and significantly lifts mood.',
+  '💡 5-4-3-2-1 grounding: name 5 things you see, 4 you touch, 3 you hear, 2 you smell, 1 you taste.',
+  '💡 Pomodoro: 25 min study + 5 min break reduces cognitive fatigue by up to 40%.',
+  '💡 Staying hydrated improves concentration. Keep water at your desk.',
+  '💡 Journaling 5 minutes before sleep helps process emotions and improves rest quality.'
+];
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const nm = userName();
+  document.getElementById('sbNm').textContent  = nm;
+  document.getElementById('sbAv').textContent  = nm.slice(0,2).toUpperCase();
+  document.getElementById('tbDate').textContent = new Date().toLocaleDateString('en-BD',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('tipBox').textContent = TIPS[new Date().getDay() % TIPS.length];
+  buildMoodGrid();
+});
+
+/* ── PANEL SWITCH ── */
+const TITLES = { checkin:'Mood Check-In', history:'My History', resources:'Wellness Resources',
+                 breathing:'Breathing Exercise', goals:'Daily Goals' };
+
+function go(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  document.getElementById('pgTitle').textContent = TITLES[id] || id;
+  if (id === 'history') loadHistory();
+  if (id === 'goals')   updateGoals();
+  if (id === 'resources') document.getElementById('gc-5').textContent = 'Viewed ✓';
+}
+
+/* ── MOOD GRID ── */
+const EMOJIS = ['😰','😟','😕','😐','🙂','😊','😄','😁','🤩','🌟'];
+function buildMoodGrid() {
+  const g = document.getElementById('moodGrid');
+  for (let i = 1; i <= 10; i++) {
+    const b = document.createElement('button');
+    b.className = 'mb'; b.dataset.s = i;
+    b.innerHTML = `<span class="mn">${i}</span>${EMOJIS[i-1]}`;
+    b.onclick = () => { selScore = i; g.querySelectorAll('.mb').forEach((x,j)=>x.classList.toggle('sel',j+1===i)); };
+    g.appendChild(b);
+  }
+}
+
+/* ── SUBMIT MOOD → POST /mood/submit ── */
+async function submitMood() {
+  if (!selScore) { showToast('Please select a mood score first.','err'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const res  = await fetch(API+'/mood/submit', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token()},
+      body: JSON.stringify({ student_id:userId(), mood_score:selScore,
+        mood_type: document.getElementById('moodType').value,
+        notes: document.getElementById('noteIn').value })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail||'Submit failed');
+
+    sessCount++; sessScores.push(data.mood_score);
+    const avg = (sessScores.reduce((a,b)=>a+b,0)/sessScores.length).toFixed(1);
+    document.getElementById('ov-last').textContent = data.mood_score;
+    document.getElementById('ov-cnt').textContent  = sessCount;
+    document.getElementById('ov-avg').textContent  = avg;
+    const rEl = document.getElementById('ov-risk');
+    rEl.textContent = data.risk_level;
+    rEl.style.color = data.risk_level==='HIGH'?'var(--red)':data.risk_level==='MODERATE'?'var(--yellow)':'var(--green)';
+
+    const iv = document.getElementById('ivBox');
+    iv.className = 'iv '+data.risk_level.toLowerCase();
+    iv.style.display = 'block';
+    iv.innerHTML = `<strong>${data.risk_level==='HIGH'?'⚠️ Support needed':data.risk_level==='MODERATE'?'💛 Wellness tip':'✅ Keep it up'}</strong><br>${data.intervention}`;
+
+    if (document.getElementById('noteIn').value.trim()) notesCount++;
+    updateSessionChart();
+    updateGoals(selScore);
+    showToast('Check-in saved!','ok');
+    selScore = null;
+    document.getElementById('moodGrid').querySelectorAll('.mb').forEach(b=>b.classList.remove('sel'));
+    document.getElementById('noteIn').value = '';
+    document.getElementById('moodType').value = '';
+  } catch(e) { showToast(e.message,'err'); }
+  btn.disabled = false; btn.textContent = 'Submit Check-In →';
+}
+
+/* ── SESSION CHART ── */
+function updateSessionChart() {
+  const cols = sessScores.map(s=>s<=3?'#f06060':s<=6?'#f0b429':'#22d3a5');
+  const labels = sessScores.map((_,i)=>`#${i+1}`);
+  if (sessChart) { sessChart.data.labels=labels; sessChart.data.datasets[0].data=sessScores; sessChart.data.datasets[0].backgroundColor=cols; sessChart.update(); return; }
+  sessChart = new Chart(document.getElementById('sessChart'),{type:'bar',
+    data:{labels,datasets:[{data:sessScores,backgroundColor:cols,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},
+              x:{ticks:{color:'#4a5680'},grid:{display:false}}}}});
+}
+
+/* ── LOAD HISTORY → GET /mood/history ── */
+async function loadHistory() {
+  const tb = document.getElementById('histBody');
+  tb.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">Loading…</td></tr>';
+  try {
+    const res  = await fetch(API+'/mood/history?limit=30',{headers:{'Authorization':'Bearer '+token()}});
+    const rows = await res.json();
+    if (!Array.isArray(rows)||!rows.length) {
+      tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No check-ins yet. Submit your first one!</td></tr>'; return;
+    }
+    tb.innerHTML = rows.map((r,i)=>`
+      <tr>
+        <td style="color:var(--muted)">${i+1}</td>
+        <td style="color:var(--muted2);white-space:nowrap">${fmtDate(r.timestamp)}</td>
+        <td><strong>${r.score}</strong>/10</td>
+        <td style="color:var(--muted2)">${r.type||'general'}</td>
+        <td><span class="rb ${r.risk_level}">${r.risk_level}</span></td>
+        <td style="color:var(--muted2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.notes||''}">${r.notes||'—'}</td>
+        <td style="display:flex;gap:6px">
+          <button style="font-size:.7rem;padding:3px 9px;border-radius:7px;border:1px solid var(--border);background:none;cursor:pointer;color:var(--muted2)" onclick="openEdit('${r.id}',${r.score},'${(r.notes||'').replace(/'/g,"\\'")}')">Edit</button>
+          <button style="font-size:.7rem;padding:3px 9px;border-radius:7px;border:1px solid rgba(240,96,96,.2);background:rgba(240,96,96,.08);cursor:pointer;color:var(--red)" onclick="deleteMood('${r.id}')">Delete</button>
+        </td>
+      </tr>`).join('');
+
+    /* draw trend chart */
+    const rev = [...rows].reverse();
+    const sc  = rev.map(r=>r.score);
+    const lb  = rev.map(r=>fmtDate(r.timestamp).split(',')[0]);
+    const co  = sc.map(s=>s<=3?'#f06060':s<=6?'#f0b429':'#22d3a5');
+    if (histChart) histChart.destroy();
+    histChart = new Chart(document.getElementById('histChart'),{type:'bar',
+      data:{labels:lb,datasets:[{data:sc,backgroundColor:co,borderRadius:4,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{min:0,max:10,ticks:{color:'#4a5680',stepSize:5},grid:{color:'rgba(255,255,255,.04)'}},
+                x:{ticks:{color:'#4a5680',font:{size:9}},grid:{display:false}}}}});
+  } catch(e) { tb.innerHTML=`<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px">${e.message}</td></tr>`; }
+}
+
+/* ── EDIT → PUT /mood/{id} ── */
+function openEdit(id, score, notes) {
+  document.getElementById('editId').value    = id;
+  document.getElementById('editScore').value = score;
+  document.getElementById('editNotes').value = notes;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function saveEdit() {
+  const id    = document.getElementById('editId').value;
+  const score = parseInt(document.getElementById('editScore').value);
+  const notes = document.getElementById('editNotes').value;
+  try {
+    const res = await fetch(API+`/mood/${id}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token()},
+      body: JSON.stringify({mood_score:score,notes})
+    });
+    if (!res.ok) { const d=await res.json(); throw new Error(d.detail); }
+    showToast('Check-in updated!','ok'); closeModal('editModal'); loadHistory();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── DELETE → DELETE /mood/{id} ── */
+async function deleteMood(id) {
+  if (!confirm('Delete this check-in? This cannot be undone.')) return;
+  try {
+    const res = await fetch(API+`/mood/${id}`,{
+      method:'DELETE',headers:{'Authorization':'Bearer '+token()}
+    });
+    if (!res.ok) { const d=await res.json(); throw new Error(d.detail); }
+    showToast('Deleted.','ok'); loadHistory();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+/* ── BREATHING ── */
+function toggleBreath() {
+  if (breathInterval) { clearInterval(breathInterval); breathInterval=null; document.getElementById('breathBtn').textContent='▶ Start'; return; }
+  breathPhaseIdx=0; breathSec=4;
+  document.getElementById('breathBtn').textContent='⏹ Pause';
+  const circle = document.getElementById('breathCircle');
+  const phase  = document.getElementById('breathPhase');
+  const cnt    = document.getElementById('breathCount');
+  breathInterval = setInterval(()=>{
+    circle.textContent = PHASES[breathPhaseIdx];
+    circle.style.borderColor = PHASE_COLORS[breathPhaseIdx];
+    circle.style.color       = PHASE_COLORS[breathPhaseIdx];
+    circle.style.background  = PHASE_COLORS[breathPhaseIdx]+'18';
+    phase.textContent = PHASES[breathPhaseIdx];
+    cnt.textContent   = breathSec + 's';
+    breathSec--;
+    if (breathSec < 0) { breathPhaseIdx=(breathPhaseIdx+1)%4; breathSec=4; }
+  }, 1000);
+  breathDone = true;
+  document.getElementById('gc-3').textContent = 'Done ✓';
+  document.getElementById('gc-3').style.color = 'var(--green)';
+  document.getElementById('g-breath').textContent = 'Done ✓';
+  document.getElementById('g-breath').style.color = 'var(--green)';
+}
+function resetBreath() {
+  if (breathInterval) { clearInterval(breathInterval); breathInterval=null; }
+  document.getElementById('breathBtn').textContent = '▶ Start';
+  document.getElementById('breathCircle').textContent = 'Press Start';
+  document.getElementById('breathCircle').style.cssText = 'width:160px;height:160px;border-radius:50%;background:rgba(91,142,240,.1);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1rem;color:var(--accent);font-weight:500;transition:all 1s ease';
+  document.getElementById('breathPhase').textContent = '—';
+  document.getElementById('breathCount').textContent  = '—';
+}
+
+/* ── GOALS UPDATE ── */
+function updateGoals(score) {
+  if (sessCount >= 1) {
+    document.getElementById('g-cnt').textContent = sessCount; document.getElementById('g-cnt').style.color='var(--green)';
+    document.getElementById('gc-1').textContent  = 'Done ✓'; document.getElementById('gc-1').style.color='var(--green)';
+  }
+  if (score) {
+    document.getElementById('g-score').textContent = score+'/10';
+    document.getElementById('g-score').style.color = score>=6?'var(--green)':'var(--red)';
+    document.getElementById('gc-2').textContent    = score>=6?'Met ✓ ('+score+'/10)':'Below target ('+score+'/10)';
+    document.getElementById('gc-2').style.color    = score>=6?'var(--green)':'var(--red)';
+  }
+  document.getElementById('g-notes').textContent = notesCount;
+  if (notesCount>0) { document.getElementById('gc-4').textContent=notesCount+' written ✓'; document.getElementById('gc-4').style.color='var(--green)'; }
+}
+
+/* ── HELPERS ── */
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-BD',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show '+type;
+  clearTimeout(t._t); t._t = setTimeout(()=>t.className='toast',3000);
+}
+function logout() { localStorage.clear(); window.location.href='/ui/login'; }
+</script>
+</body>
+</html>

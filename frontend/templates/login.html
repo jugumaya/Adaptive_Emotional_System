@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEE — Sign In</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,500;1,400&display=swap');
+:root{
+  --bg:#0a0d16;--surface:#0f1420;--card:#141928;--border:#1e2a42;
+  --accent:#5b8ef0;--accent2:#7c6ff7;--green:#22d3a5;--yellow:#f0b429;
+  --red:#f06060;--text:#e2e8f8;--muted:#4a5680;--muted2:#7a88b0;
+  --font:'Inter',sans-serif;--serif:'Playfair Display',serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);
+  display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 30%,rgba(91,142,240,.07) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%,rgba(124,111,247,.05) 0%,transparent 55%);
+  pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;
+  width:900px;min-height:560px;border-radius:22px;overflow:hidden;
+  border:1px solid var(--border);animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* LEFT */
+.left{background:var(--surface);padding:52px 48px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:44px}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text{font-size:1rem;font-weight:600;color:var(--text)}
+.logo-sub{font-size:.65rem;color:var(--muted);margin-top:1px}
+.hero-title{font-family:var(--serif);font-size:2.1rem;line-height:1.2;margin-bottom:14px;color:var(--text)}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-desc{font-size:.85rem;line-height:1.75;color:var(--muted2);margin-bottom:34px}
+.feat-list{display:flex;flex-direction:column;gap:11px}
+.feat{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted2)}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* RIGHT */
+.right{background:var(--card);padding:52px 48px;display:flex;flex-direction:column;justify-content:center}
+.form-title{font-family:var(--serif);font-size:1.6rem;margin-bottom:5px}
+.form-sub{font-size:.83rem;color:var(--muted2);margin-bottom:28px}
+
+.role-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--surface);
+  padding:4px;border-radius:11px;border:1px solid var(--border);margin-bottom:24px}
+.rtab{padding:7px 2px;text-align:center;border-radius:8px;cursor:pointer;
+  font-size:.66rem;font-weight:500;color:var(--muted);border:none;
+  background:none;font-family:var(--font);transition:all .18s}
+.rtab:hover{color:var(--text)}
+.rtab.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.72rem;color:var(--muted2);margin-bottom:6px;letter-spacing:.03em}
+.field input{width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:9px;padding:11px 14px;font-family:var(--font);font-size:.9rem;
+  color:var(--text);outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--accent)}
+.field input::placeholder{color:var(--muted)}
+
+.login-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:9px;padding:13px;font-family:var(--font);
+  font-size:.92rem;font-weight:600;cursor:pointer;margin-top:4px;transition:all .2s}
+.login-btn:hover{opacity:.9;transform:translateY(-1px)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.divider{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:.72rem;color:var(--muted)}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.demo-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.demo-chip{font-size:.7rem;padding:4px 10px;border-radius:99px;cursor:pointer;
+  border:1px solid var(--border);background:var(--surface);color:var(--muted2);transition:all .15s}
+.demo-chip:hover{border-color:var(--accent);color:var(--accent)}
+.reg-link{font-size:.78rem;color:var(--muted2);text-align:center}
+.reg-link a{color:var(--accent);text-decoration:none}
+.reg-link a:hover{text-decoration:underline}
+.err-msg{font-size:.76rem;color:var(--red);margin-bottom:10px;display:none;padding:8px 12px;
+  background:rgba(240,96,96,.08);border:1px solid rgba(240,96,96,.2);border-radius:7px}
+
+@media(max-width:700px){.page{grid-template-columns:1fr;width:95%}.left{display:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- LEFT -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div><div class="logo-text">AEE Platform</div><div class="logo-sub">CSE307 · IUB · Group 05</div></div>
+    </div>
+    <h1 class="hero-title">Your emotional<br><em>well-being,</em><br>supported.</h1>
+    <p class="hero-desc">A non-clinical, privacy-first emotional support platform for university students. No diagnoses. No physical sensors. Just thoughtful, adaptive care.</p>
+    <div class="feat-list">
+      <div class="feat"><div class="feat-dot"></div>Anonymous mood tracking & check-ins</div>
+      <div class="feat"><div class="feat-dot"></div>Rule-based emotional risk analysis</div>
+      <div class="feat"><div class="feat-dot"></div>Personalized micro-interventions</div>
+      <div class="feat"><div class="feat-dot"></div>Fully encrypted & anonymized data</div>
+      <div class="feat"><div class="feat-dot"></div>Role-based access for all stakeholders</div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <h2 class="form-title">Welcome back</h2>
+    <p class="form-sub">Sign in to your dashboard</p>
+
+    <div class="role-bar">
+      <button class="rtab on"  onclick="setRole('student',this)">Student</button>
+      <button class="rtab"     onclick="setRole('counselor',this)">Counselor</button>
+      <button class="rtab"     onclick="setRole('advisor',this)">Advisor</button>
+      <button class="rtab"     onclick="setRole('admin',this)">Admin</button>
+      <button class="rtab"     onclick="setRole('management',this)">Uni Mgmt</button>
+    </div>
+
+    <div class="field">
+      <label>Email address</label>
+      <input type="email" id="emailIn" placeholder="you@iub.edu.bd" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="passIn" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <div class="err-msg" id="errMsg"></div>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign in →</button>
+
+    <div class="divider">Quick demo login</div>
+    <div class="demo-row">
+      <span class="demo-chip" onclick="quickFill('student')">🎓 Student</span>
+      <span class="demo-chip" onclick="quickFill('counselor')">💚 Counselor</span>
+      <span class="demo-chip" onclick="quickFill('advisor')">💜 Advisor</span>
+      <span class="demo-chip" onclick="quickFill('admin')">🛡️ Admin</span>
+      <span class="demo-chip" onclick="quickFill('management')">🏛️ Uni Mgmt</span>
+    </div>
+    <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:14px">All demo passwords: <strong style="color:var(--text)">demo1234</strong></p>
+    <p class="reg-link">No account? <a href="/ui/register">Create one here</a></p>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8000';
+let role = 'student';
+
+function setRole(r, btn) {
+  role = r;
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+const DEMO_EMAILS = {
+  student:'student@aee.edu', counselor:'counselor@aee.edu',
+  advisor:'advisor@aee.edu', admin:'admin@aee.edu', management:'management@aee.edu'
+};
+
+function quickFill(r) {
+  document.getElementById('emailIn').value = DEMO_EMAILS[r];
+  document.getElementById('passIn').value  = 'demo1234';
+  document.querySelectorAll('.rtab').forEach((t,i) => {
+    const roles = ['student','counselor','advisor','admin','management'];
+    t.classList.toggle('on', roles[i]===r);
+  });
+  role = r;
+  setTimeout(doLogin, 250);
+}
+
+async function doLogin() {
+  const email = document.getElementById('emailIn').value.trim();
+  const pass  = document.getElementById('passIn').value.trim();
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('errMsg');
+  err.style.display = 'none';
+
+  if (!email || !pass) { showErr('Please enter your email and password.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res  = await fetch(API + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed.');
+
+    localStorage.setItem('aee_token',   data.access_token);
+    localStorage.setItem('aee_role',    data.role);
+    localStorage.setItem('aee_user_id', data.user_id);
+    localStorage.setItem('aee_anon_id', data.anonymous_id);
+    localStorage.setItem('aee_name',    data.name  || '');
+    localStorage.setItem('aee_email',   data.email || '');
+
+    const map = { student:'student', counselor:'counselor', advisor:'counselor',
+                  admin:'admin', management:'management' };
+    window.location.href = `/ui/dashboard/${map[data.role] || 'student'}`;
+  } catch(e) {
+    showErr(e.message);
+    btn.disabled = false; btn.textContent = 'Sign in →';
+  }
+}
+
+function showErr(m) {
+  const el = document.getElementById('errMsg');
+  el.textContent = m; el.style.display = 'block';
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+</script>
+</body>
+</html>
+
+
