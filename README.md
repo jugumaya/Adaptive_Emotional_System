@@ -35,7 +35,7 @@ Built as a final group project for **CSE307 — System Analysis and Design** at 
 | ⚠️ **High-Risk Alerts** | Auto-notifications sent to counselors when HIGH risk is detected |
 | 📈 **Mood Trends** | Charts of aggregated mood data over time |
 | 📝 **Guidance Notes** | Counselors create, edit, delete professional guidance (full CRUD) |
-| 🔔 **Notifications** | System alerts for counselors and advisors, with read/unread tracking |
+| 🔔 **Notifications** | System alerts for counselors, with read/unread tracking |
 | 🏛️ **Institutional Reports** | Anonymized campus-wide data for university management |
 | 🛡️ **Admin Control** | Full user management (create, read, update, delete all roles) |
 | 🔒 **Privacy First** | All student data stored with anonymous IDs, never identifiable |
@@ -153,8 +153,7 @@ This creates one demo account per role:
 |---|---|---|
 | 🎓 Student | `student@aee.edu` | `demo1234` |
 | 💚 Counselor | `counselor@aee.edu` | `demo1234` |
-| 💜 Advisor | `advisor@aee.edu` | `demo1234` |
-| 🛡️ Admin | `admin@aee.edu` | `demo1234` |
+| ️ Admin | `admin@aee.edu` | `demo1234` |
 | 🏛️ Management | `management@aee.edu` | `demo1234` |
 
 ### 5. Run the server
@@ -188,7 +187,7 @@ uvicorn main:app --reload
 | `PUT` | `/mood/{id}` | Update a check-in (re-runs risk engine) |
 | `DELETE` | `/mood/{id}` | Delete a check-in (cascades) |
 
-### Counselor / Advisor
+### Counselor
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/counselor/alerts` | High-risk alerts (anonymized) |
@@ -232,7 +231,7 @@ uvicorn main:app --reload
 
 ## 🔒 Role-Based Access Control
 
-| Endpoint Group | Student | Counselor / Advisor | Admin | Management |
+| Endpoint Group | Student | Counselor | Admin | Management |
 |---|:---:|:---:|:---:|:---:|
 | `/mood/submit` | ✅ | ✅ | ✅ | ❌ |
 | `/mood/history` | ✅ own | ✅ all | ✅ all | ❌ |
@@ -259,7 +258,7 @@ All enforcement is done via `app/core/deps.py → require_roles(...)` — a sing
 - Guided box-breathing exercise with animated timer
 - Wellness resources panel
 
-### 💚 Counselor / Advisor Dashboard
+### 💚 Counselor Dashboard
 - Campus risk overview (High / Moderate / Low counts)
 - Anonymized high-risk student alerts (by anonymous ID only)
 - Weekly mood trend chart (live from backend)

@@ -1,6 +1,6 @@
 """
-Report routes — for Counselors, Advisors, Admins, and University Management.
-Matches DFD 1.5 Generate Report + CRUD Matrix (Administrator: C,R / Advisor: R)
+Report routes — for Counselors, Admins, and University Management.
+Matches DFD 1.5 Generate Report + CRUD Matrix.
 
 All data here is fully anonymized/aggregated — no individual student is identifiable.
 """
@@ -16,7 +16,7 @@ from app.services.report_service import (
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
-ALLOWED = ("counselor", "advisor", "admin", "management")
+ALLOWED = ("counselor", "admin", "management")
 
 
 @router.get("/aggregated")

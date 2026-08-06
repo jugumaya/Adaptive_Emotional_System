@@ -152,7 +152,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 
 <div class="main">
   <div class="topbar">
-    <div class="tb-l"><div class="pg-title" id="pgTitle">Counselor Dashboard</div><span class="pg-tag">Advisory Access</span></div>
+    <div class="tb-l"><div class="pg-title" id="pgTitle">Counselor Dashboard</div><span class="pg-tag">Clinical Access</span></div>
     <div class="tb-r"><span class="tb-date" id="tbDate"></span><button class="tb-btn" onclick="logout()">← Logout</button></div>
   </div>
 
@@ -270,7 +270,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 
 <div class="toast" id="toast"></div>
 <script>
-const API   = 'http://localhost:8000';
+// Use same origin so the page works on any host/port without CORS.
+const API   = window.location.origin;
 const token = () => localStorage.getItem('aee_token');
 if (!token()) window.location.href = '/ui/login';
 

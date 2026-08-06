@@ -1,5 +1,5 @@
 """
-Notification model — stores system-generated alerts for counselors/admins.
+Notification model — stores system-generated alerts for counselors and admins.
 
 Notifications are created automatically when:
   - A student submits a HIGH-risk mood score
@@ -16,7 +16,7 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    recipient_role = Column(String, nullable=False)   # counselor / advisor / admin
+    recipient_role = Column(String, nullable=False)   # counselor / admin
     title = Column(String, nullable=False)
     message = Column(String, nullable=False)
     is_read = Column(Boolean, default=False)

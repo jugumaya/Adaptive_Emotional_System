@@ -18,8 +18,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
-from app.db.database import engine, Base
+from app.db.database import engine, Base, ensure_database_exists
 
 # CRITICAL: all models must be imported BEFORE create_all()
 # so SQLAlchemy knows about every table before creating them.
@@ -39,18 +40,32 @@ from app.api.routes import (
     counselor,
     management,
     notifications,
+    student,
     ui,
 )
 
 # ── Database ────────────────────────────────────────────────────────────────
-Base.metadata.create_all(bind=engine)
+# Attempt to auto-create the target database (PostgreSQL only) and then create
+# all tables. We swallow connection errors at startup so the API still boots and
+# /docs remains reachable — individual endpoints will surface real DB errors.
+try:
+    ensure_database_exists()
+    Base.metadata.create_all(bind=engine)
+except Exception as _db_err:  # noqa: BLE001
+    import warnings
+    warnings.warn(
+        f"[startup] Database init failed: {_db_err!r}. "
+        "Endpoints that touch the DB will return 500 until the DB is reachable.",
+        RuntimeWarning,
+        stacklevel=1,
+    )
 
 # ── App ─────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Adaptive Emotional Ecosystem (AEE)",
     description=(
         "Non-clinical emotional well-being platform for university students.\n\n"
-        "**Roles:** student · counselor · advisor · admin · management\n\n"
+        "**Roles:** student · counselor · admin · management\n\n"
         "All student data is anonymized. No clinical diagnoses are made."
     ),
     version="2.0.0",
@@ -72,13 +87,29 @@ app.include_router(reports.router)        # GET /reports/aggregated  /reports/we
 app.include_router(management.router)     # GET /management/summary  /monthly-report  /departments
 app.include_router(notifications.router)  # GET/PUT/DELETE /notifications/*
 app.include_router(admin.router)          # CRUD /api/admin/users  GET /api/admin/metrics
+app.include_router(student.router)       # GET /student/guidance (student-only)
 app.include_router(ui.router)             # GET /ui/login  /ui/dashboard/* (serves HTML)
+
+# ── Static assets (CSS, JS, images) ──────────────────────────────────────────
+# Mirrors the same search as ui.py so it works regardless of cwd.
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_DIR, ".."))
+for _static_candidate in (
+    os.path.join(_PROJECT_ROOT, "frontend", "static"),
+    os.path.join(_BACKEND_DIR, "frontend", "static"),
+    os.path.join(_BACKEND_DIR, "static"),
+):
+    if os.path.isdir(_static_candidate):
+        app.mount("/static", StaticFiles(directory=_static_candidate), name="static")
+        break
 
 
 # ── Root ─────────────────────────────────────────────────────────────────────
 @app.get("/", tags=["Health"], include_in_schema=False)
 def root():
-    return RedirectResponse(url="/ui/login")
+    # Entry point: send new users to register first; existing users can
+    # click "Sign in" on the register page to reach /ui/login.
+    return RedirectResponse(url="/ui/register")
 
 
 @app.get("/health", tags=["Health"])
@@ -88,5 +119,5 @@ def health_check():
         "version": "2.0.0",
         "project": "Adaptive Emotional Ecosystem — CSE307 Group 05",
         "docs": "/docs",
-        "roles": ["student", "counselor", "advisor", "admin", "management"],
+        "roles": ["student", "counselor", "admin", "management"],
     }

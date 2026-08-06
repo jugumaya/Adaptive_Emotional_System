@@ -11,4 +11,4 @@ class Report(Base):
     aggregated_data = Column(String)      # JSON string
     is_anonymized = Column(Boolean, default=True)
     generated_at = Column(DateTime, server_default=func.now())
-    generated_by = Column(String)         # admin / counselor / advisor / management / system
+    generated_by = Column(String)         # admin / counselor / management / system

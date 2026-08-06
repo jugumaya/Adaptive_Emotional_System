@@ -77,12 +77,6 @@ def serve_counselor_dashboard():
     return _serve("counselor", "dashboard.html")
 
 
-@router.get("/dashboard/advisor")
-def serve_advisor_dashboard():
-    # Advisors use the same dashboard as counselors
-    return _serve("counselor", "dashboard.html")
-
-
 @router.get("/dashboard/admin")
 def serve_admin_dashboard():
     return _serve("admin", "dashboard.html")

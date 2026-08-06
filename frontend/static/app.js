@@ -4,7 +4,8 @@
    Shared API helpers, auth, toast, utils
    ===================================================== */
 
-const API = 'http://localhost:8000';
+// Use same origin so the page works on any host/port without CORS.
+const API = window.location.origin;
 
 /* ── Auth helpers ── */
 const Auth = {
@@ -30,7 +31,7 @@ const Auth = {
     return h;
   },
   redirectToDashboard() {
-    const map = { student:'student', counselor:'counselor', advisor:'counselor',
+    const map = { student:'student', counselor:'counselor',
                   admin:'admin', management:'management' };
     const role = this.role();
     window.location.href = `/ui/dashboard/${map[role] || 'student'}`;
@@ -92,7 +93,7 @@ function riskBadge(level) {
 /* ── Sidebar builder ── */
 function buildSidebar({ items, active, role }) {
   const initials = (Auth.name() || Auth.email() || 'U').slice(0,2).toUpperCase();
-  const roleLabel = { student:'Student', counselor:'Counselor', advisor:'Advisor',
+  const roleLabel = { student:'Student', counselor:'Counselor',
                       admin:'System Admin', management:'University Mgmt' };
 
   const navHtml = items.map(it => {

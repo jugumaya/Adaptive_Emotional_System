@@ -72,7 +72,7 @@ def submit_mood(
     db.add(intervention)
     db.commit()
 
-    # Auto-create HIGH-risk notification for counselors/advisors
+    # Auto-create HIGH-risk notification for counselors
     if risk_level == "HIGH":
         student = db.query(Student).filter(Student.id == student_id).first()
         anon = str(student.anonymous_id) if student else "anon_unknown"
@@ -97,7 +97,7 @@ def get_mood_history(
 ):
     """
     - Student role: returns only their own records (privacy enforced).
-    - counselor/advisor/admin/management: returns all or filtered by student_id.
+    - counselor/admin/management: returns all or filtered by student_id.
     """
     query = (
         db.query(EmotionData, RiskAnalysis)
@@ -139,7 +139,7 @@ def update_mood_log(
 ):
     """
     Student can update their own mood log.
-    counselor/advisor/admin can update any log.
+    counselor/admin can update any log.
     Re-runs the risk engine if the score changed.
     """
     emotion = db.query(EmotionData).filter(EmotionData.id == log_id).first()
@@ -193,9 +193,13 @@ def delete_mood_log(
     if not emotion:
         raise HTTPException(status_code=404, detail="Mood log not found.")
 
-    if cast(str, current_user.role) == "student" and cast(str, emotion.student_id) != cast(str, current_user.id):
-        raise HTTPException(status_code=403, detail="You can only delete your own mood logs.")
-    if str(current_user.role) not in ("student", "admin", "counselor", "advisor"):
+    user_role = str(current_user.role)
+    if user_role == "student":
+        # students can only delete their own logs
+        if cast(str, emotion.student_id) != cast(str, current_user.id):
+            raise HTTPException(status_code=403, detail="You can only delete your own mood logs.")
+    elif user_role not in ("admin", "counselor"):
+        # everyone else (e.g. management) is forbidden
         raise HTTPException(status_code=403, detail="Permission denied.")
 
     # Cascade: delete linked risk analysis and intervention first
@@ -214,9 +218,9 @@ def delete_mood_log(
 
 
 def _create_high_risk_notification(db, anonymous_id: str, score: int):
-    """Auto-create a notification for counselors/advisors when HIGH risk is detected."""
+    """Auto-create a notification for counselors when HIGH risk is detected."""
     from app.models.notification import Notification
-    for role in ("counselor", "advisor"):
+    for role in ("counselor",):
         notif = Notification(
             recipient_role=role,
             title="⚠️ High-Risk Alert",

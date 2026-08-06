@@ -1,4 +1,4 @@
-# NEW: GuidanceNote — lets Counselors/Advisors record professional guidance,
+# GuidanceNote — lets Counselors record professional guidance,
 # either general (student_anonymous_id = None) or targeted at one anonymized student.
 # Supports full CRUD via /counselor/guidance routes.
 import uuid

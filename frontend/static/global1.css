@@ -278,7 +278,6 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
               border-radius: 99px; font-weight: 500; }
 .rb-student    { background: var(--accent-d); color: var(--accent); }
 .rb-counselor  { background: var(--green-d); color: var(--green); }
-.rb-advisor    { background: var(--purple-d); color: var(--purple); }
 .rb-admin      { background: var(--red-d); color: var(--red); }
 .rb-management { background: var(--yellow-d); color: var(--yellow); }
 

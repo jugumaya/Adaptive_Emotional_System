@@ -94,7 +94,7 @@ def get_monthly_report(
 
     total_counselors = (
         db.query(Student)
-        .filter(Student.role.in_(["counselor", "advisor"]))
+        .filter(Student.role == "counselor")
         .count()
     )
 
@@ -105,7 +105,7 @@ def get_monthly_report(
         "monthly_average_mood": round(float(monthly_avg), 2),
         "high_risk_flags": monthly_high,
         "interventions_delivered": monthly_interventions,
-        "counselors_advisors_active": total_counselors,
+        "counselors_active": total_counselors,
         "system_uptime_percent": 99.2,        # static — connect to monitoring in production
         "data_compliance": "100% anonymized",
         "privacy_note": "No individual student data is included in this report.",

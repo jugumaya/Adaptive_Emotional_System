@@ -83,7 +83,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .rb{display:inline-block;font-size:.67rem;padding:2px 8px;border-radius:99px;font-weight:500}
 .rb-student{background:rgba(91,142,240,.12);color:var(--accent)}
 .rb-counselor{background:rgba(34,211,165,.12);color:var(--green)}
-.rb-advisor{background:rgba(167,139,250,.12);color:var(--purple)}
 .rb-admin{background:rgba(240,96,96,.12);color:var(--red)}
 .rb-management{background:rgba(240,180,41,.12);color:var(--yellow)}
 /* INPUTS */
@@ -202,7 +201,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
               <label>Role</label>
               <select class="inp" id="cu-role">
                 <option value="student">Student</option><option value="counselor">Counselor</option>
-                <option value="advisor">Advisor</option><option value="admin">Admin</option><option value="management">Management</option>
+                <option value="admin">Admin</option><option value="management">Management</option>
               </select>
             </div>
           </div>
@@ -226,7 +225,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
           <div class="card-title">ℹ️ Role Permissions</div>
           <div class="s-row"><span class="s-l"><span class="rb rb-student">student</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Mood submit, history</span></div>
           <div class="s-row"><span class="s-l"><span class="rb rb-counselor">counselor</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Alerts, guidance, reports</span></div>
-          <div class="s-row"><span class="s-l"><span class="rb rb-advisor">advisor</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Same as counselor</span></div>
           <div class="s-row"><span class="s-l"><span class="rb rb-admin">admin</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Full system access</span></div>
           <div class="s-row"><span class="s-l"><span class="rb rb-management">management</span></span><span class="s-v" style="font-size:.75rem;color:var(--muted2)">Reports only</span></div>
         </div>
@@ -288,8 +286,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
               <tr><td>/auth/login</td><td>POST</td><td><span class="dot dg"></span> Active</td><td>Public</td></tr>
               <tr><td>/mood/submit</td><td>POST</td><td><span class="dot dg"></span> Active</td><td>Any logged-in</td></tr>
               <tr><td>/mood/history</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>Any logged-in</td></tr>
-              <tr><td>/counselor/alerts</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>counselor/advisor/admin</td></tr>
-              <tr><td>/counselor/guidance</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>counselor/advisor/admin</td></tr>
+              <tr><td>/counselor/alerts</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>counselor/admin</td></tr>
+              <tr><td>/counselor/guidance</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>counselor/admin</td></tr>
               <tr><td>/reports/aggregated</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>Staff roles</td></tr>
               <tr><td>/management/summary</td><td>GET</td><td><span class="dot dg"></span> Active</td><td>management/admin</td></tr>
               <tr><td>/api/admin/users</td><td>CRUD</td><td><span class="dot dg"></span> Active</td><td>admin only</td></tr>
@@ -333,7 +331,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
       <label>Role</label>
       <select class="inp" id="editRole">
         <option value="student">Student</option><option value="counselor">Counselor</option>
-        <option value="advisor">Advisor</option><option value="admin">Admin</option><option value="management">Management</option>
+        <option value="admin">Admin</option><option value="management">Management</option>
       </select>
     </div>
     <div class="field"><label>Department</label><input class="inp" id="editDept" placeholder="e.g. CSE"></div>
@@ -346,7 +344,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 
 <div class="toast" id="toast"></div>
 <script>
-const API   = 'http://localhost:8000';
+// Use same origin so the page works on any host/port without CORS.
+const API   = window.location.origin;
 const token = () => localStorage.getItem('aee_token');
 if (!token()) window.location.href = '/ui/login';
 

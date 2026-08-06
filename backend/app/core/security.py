@@ -4,8 +4,8 @@ Security utilities for the AEE platform.
 Password hashing: PBKDF2-HMAC-SHA256 (100,000 iterations) — no external
 native dependencies required (no bcrypt/passlib build issues on Windows).
 
-Tokens: standard JWT (python-jose), used for all 5 roles
-(student, counselor, advisor, admin, management).
+Tokens: standard JWT (python-jose), used for all 4 roles
+(student, counselor, admin, management).
 """
 from datetime import datetime, timedelta
 import hashlib

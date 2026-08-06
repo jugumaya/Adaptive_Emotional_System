@@ -21,7 +21,7 @@ body::before{content:'';position:fixed;inset:0;
              radial-gradient(ellipse 60% 50% at 80% 80%,rgba(124,111,247,.05) 0%,transparent 55%);
   pointer-events:none;z-index:0}
 .page{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;
-  width:900px;min-height:560px;border-radius:22px;overflow:hidden;
+  width:900px;min-height:600px;border-radius:22px;overflow:hidden;
   border:1px solid var(--border);animation:rise .5s ease both}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
@@ -41,19 +41,20 @@ body::before{content:'';position:fixed;inset:0;
 
 /* RIGHT */
 .right{background:var(--card);padding:52px 48px;display:flex;flex-direction:column;justify-content:center}
-.form-title{font-family:var(--serif);font-size:1.6rem;margin-bottom:5px}
-.form-sub{font-size:.83rem;color:var(--muted2);margin-bottom:28px}
+.form-title{font-family:var(--serif);font-size:1.55rem;margin-bottom:5px}
+.form-sub{font-size:.83rem;color:var(--muted2);margin-bottom:24px}
 
-.role-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--surface);
-  padding:4px;border-radius:11px;border:1px solid var(--border);margin-bottom:24px}
-.rtab{padding:7px 2px;text-align:center;border-radius:8px;cursor:pointer;
-  font-size:.66rem;font-weight:500;color:var(--muted);border:none;
-  background:none;font-family:var(--font);transition:all .18s}
+/* Role tabs — match the role the user registered with */
+.role-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface);
+  padding:4px;border-radius:11px;border:1px solid var(--border);margin-bottom:18px}
+.rtab{padding:8px 2px;text-align:center;border-radius:8px;cursor:pointer;font-size:.66rem;
+  font-weight:500;color:var(--muted);border:none;background:none;font-family:var(--font);transition:all .18s}
 .rtab:hover{color:var(--text)}
 .rtab.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 
-.field{margin-bottom:16px}
+.field{margin-bottom:14px}
 .field label{display:block;font-size:.72rem;color:var(--muted2);margin-bottom:6px;letter-spacing:.03em}
+.field-hint{font-size:.66rem;color:var(--muted);margin-top:4px}
 .field input{width:100%;background:var(--surface);border:1px solid var(--border);
   border-radius:9px;padding:11px 14px;font-family:var(--font);font-size:.9rem;
   color:var(--text);outline:none;transition:border-color .2s}
@@ -69,15 +70,19 @@ body::before{content:'';position:fixed;inset:0;
 .divider{display:flex;align-items:center;gap:12px;margin:18px 0;font-size:.72rem;color:var(--muted)}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.demo-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.demo-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
 .demo-chip{font-size:.7rem;padding:4px 10px;border-radius:99px;cursor:pointer;
   border:1px solid var(--border);background:var(--surface);color:var(--muted2);transition:all .15s}
 .demo-chip:hover{border-color:var(--accent);color:var(--accent)}
-.reg-link{font-size:.78rem;color:var(--muted2);text-align:center}
+.reg-link{font-size:.78rem;color:var(--muted2);text-align:center;margin-top:14px}
 .reg-link a{color:var(--accent);text-decoration:none}
 .reg-link a:hover{text-decoration:underline}
 .err-msg{font-size:.76rem;color:var(--red);margin-bottom:10px;display:none;padding:8px 12px;
   background:rgba(240,96,96,.08);border:1px solid rgba(240,96,96,.2);border-radius:7px}
+.success-banner{display:none;font-size:.78rem;color:var(--green);margin-bottom:14px;padding:10px 12px;
+  background:rgba(34,211,165,.08);border:1px solid rgba(34,211,165,.2);border-radius:7px;text-align:center}
+.role-note{font-size:.7rem;color:var(--muted2);text-align:center;margin-bottom:6px}
+.role-note b{color:var(--text)}
 
 @media(max-width:700px){.page{grid-template-columns:1fr;width:95%}.left{display:none}}
 </style>
@@ -104,19 +109,22 @@ body::before{content:'';position:fixed;inset:0;
   <!-- RIGHT -->
   <div class="right">
     <h2 class="form-title">Welcome back</h2>
-    <p class="form-sub">Sign in to your dashboard</p>
+    <p class="form-sub">Step 2 of 2 — sign in with your registered credentials.</p>
 
-    <div class="role-bar">
-      <button class="rtab on"  onclick="setRole('student',this)">Student</button>
-      <button class="rtab"     onclick="setRole('counselor',this)">Counselor</button>
-      <button class="rtab"     onclick="setRole('advisor',this)">Advisor</button>
-      <button class="rtab"     onclick="setRole('admin',this)">Admin</button>
-      <button class="rtab"     onclick="setRole('management',this)">Uni Mgmt</button>
+    <div class="success-banner" id="okBanner"></div>
+
+    <p class="role-note">Select the <b id="roleNote">Student</b> role you registered with</p>
+    <div class="role-bar" id="roleBar">
+      <button class="rtab on"  data-role="student"     onclick="setRole(this)">Student</button>
+      <button class="rtab"     data-role="counselor"   onclick="setRole(this)">Counselor</button>
+      <button class="rtab"     data-role="admin"       onclick="setRole(this)">Admin</button>
+      <button class="rtab"     data-role="management"  onclick="setRole(this)">Uni Mgmt</button>
     </div>
 
     <div class="field">
-      <label>Email address</label>
-      <input type="email" id="emailIn" placeholder="you@iub.edu.bd" autocomplete="email">
+      <label>Username or email</label>
+      <input type="text" id="identIn" placeholder="username or you@iub.edu.bd" autocomplete="username">
+      <div class="field-hint">You can use either the username or the email you registered with.</div>
     </div>
     <div class="field">
       <label>Password</label>
@@ -130,78 +138,107 @@ body::before{content:'';position:fixed;inset:0;
     <div class="demo-row">
       <span class="demo-chip" onclick="quickFill('student')">🎓 Student</span>
       <span class="demo-chip" onclick="quickFill('counselor')">💚 Counselor</span>
-      <span class="demo-chip" onclick="quickFill('advisor')">💜 Advisor</span>
       <span class="demo-chip" onclick="quickFill('admin')">🛡️ Admin</span>
       <span class="demo-chip" onclick="quickFill('management')">🏛️ Uni Mgmt</span>
     </div>
-    <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:14px">All demo passwords: <strong style="color:var(--text)">demo1234</strong></p>
-    <p class="reg-link">No account? <a href="/ui/register">Create one here</a></p>
+    <p style="font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:6px">All demo passwords: <strong style="color:var(--text)">demo1234</strong></p>
+    <p class="reg-link">No account yet? <a href="/ui/register">Create one here</a></p>
   </div>
 </div>
 
 <script>
-const API = 'http://localhost:8000';
-let role = 'student';
+const API = window.location.origin;
 
-function setRole(r, btn) {
-  role = r;
-  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('on'));
-  btn.classList.add('on');
-}
-
-const DEMO_EMAILS = {
-  student:'student@aee.edu', counselor:'counselor@aee.edu',
-  advisor:'advisor@aee.edu', admin:'admin@aee.edu', management:'management@aee.edu'
+const ROLE_LABEL = {
+  student: 'Student',
+  counselor: 'Counselor',
+  admin: 'Admin',
+  management: 'Uni Mgmt'
 };
 
-function quickFill(r) {
-  document.getElementById('emailIn').value = DEMO_EMAILS[r];
-  document.getElementById('passIn').value  = 'demo1234';
-  document.querySelectorAll('.rtab').forEach((t,i) => {
-    const roles = ['student','counselor','advisor','admin','management'];
-    t.classList.toggle('on', roles[i]===r);
-  });
-  role = r;
-  setTimeout(doLogin, 250);
+const DEMO = {
+  student:    { identifier: 'student',    email: 'student@aee.edu'    },
+  counselor:  { identifier: 'counselor',  email: 'counselor@aee.edu'  },
+  admin:      { identifier: 'admin',      email: 'admin@aee.edu'      },
+  management: { identifier: 'management', email: 'management@aee.edu' }
+};
+
+let role = 'student';
+
+function setRole(btn) {
+  role = btn.dataset.role;
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('roleNote').textContent = ROLE_LABEL[role] || role;
 }
 
-async function doLogin() {
-  const email = document.getElementById('emailIn').value.trim();
-  const pass  = document.getElementById('passIn').value.trim();
-  const btn   = document.getElementById('loginBtn');
-  const err   = document.getElementById('errMsg');
-  err.style.display = 'none';
+// If the user just registered, pre-fill the identifier + lock the role tab
+// to whatever they picked.
+const prefillIdent = sessionStorage.getItem('aee_prefill_identifier');
+const prefillRole  = sessionStorage.getItem('aee_prefill_role');
 
-  if (!email || !pass) { showErr('Please enter your email and password.'); return; }
+if (prefillRole && ROLE_LABEL[prefillRole]) {
+  const target = document.querySelector(`.rtab[data-role="${prefillRole}"]`);
+  if (target) setRole(target);
+}
+if (prefillIdent) {
+  document.getElementById('identIn').value = prefillIdent;
+  // After lock+prefill we render the success banner explaining the flow.
+  const banner = document.getElementById('okBanner');
+  banner.textContent = `Account created — sign in as ${ROLE_LABEL[role]} to continue.`;
+  banner.style.display = 'block';
+}
+sessionStorage.removeItem('aee_prefill_identifier');
+sessionStorage.removeItem('aee_prefill_role');
+sessionStorage.removeItem('aee_prefill_email');
 
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  try {
-    const res  = await fetch(API + '/auth/login', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ email, password: pass })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Login failed.');
-
-    localStorage.setItem('aee_token',   data.access_token);
-    localStorage.setItem('aee_role',    data.role);
-    localStorage.setItem('aee_user_id', data.user_id);
-    localStorage.setItem('aee_anon_id', data.anonymous_id);
-    localStorage.setItem('aee_name',    data.name  || '');
-    localStorage.setItem('aee_email',   data.email || '');
-
-    const map = { student:'student', counselor:'counselor', advisor:'counselor',
-                  admin:'admin', management:'management' };
-    window.location.href = `/ui/dashboard/${map[data.role] || 'student'}`;
-  } catch(e) {
-    showErr(e.message);
-    btn.disabled = false; btn.textContent = 'Sign in →';
-  }
+function quickFill(r) {
+  const target = document.querySelector(`.rtab[data-role="${r}"]`);
+  if (target) setRole(target);
+  document.getElementById('identIn').value = DEMO[r].identifier;
+  document.getElementById('passIn').value  = 'demo1234';
+  setTimeout(doLogin, 250);
 }
 
 function showErr(m) {
   const el = document.getElementById('errMsg');
   el.textContent = m; el.style.display = 'block';
+}
+
+async function doLogin() {
+  const identifier = document.getElementById('identIn').value.trim();
+  const pass       = document.getElementById('passIn').value;
+  const btn        = document.getElementById('loginBtn');
+  const err        = document.getElementById('errMsg');
+  err.style.display = 'none';
+
+  if (!identifier || !pass) { showErr('Please enter your username/email and password.'); return; }
+  if (identifier.includes('@') && !identifier.includes('.')) { showErr('Please enter a valid email.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const res  = await fetch(API + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ identifier, password: pass, role })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed.');
+
+    ['aee_token','aee_role','aee_user_id','aee_anon_id','aee_username','aee_name','aee_email'].forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('aee_token',     data.access_token);
+    localStorage.setItem('aee_role',      data.role);
+    localStorage.setItem('aee_user_id',   data.user_id);
+    localStorage.setItem('aee_anon_id',   data.anonymous_id);
+    localStorage.setItem('aee_username',  data.username || '');
+    localStorage.setItem('aee_name',      data.name  || '');
+    localStorage.setItem('aee_email',     data.email || '');
+
+    // Only redirect once we know the role is correct.
+    window.location.href = `/ui/dashboard/${data.role}`;
+  } catch(e) {
+    showErr(e.message);
+    btn.disabled = false; btn.textContent = 'Sign in →';
+  }
 }
 
 document.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });

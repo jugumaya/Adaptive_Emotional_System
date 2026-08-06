@@ -20,7 +20,7 @@ There is now **one backend**, **one database**, **one set of routes**.
 | Duplicate `/ui/*` routes (inline in `main.py` AND in `ui.py`) | Only `app/api/routes/ui.py` serves UI now. |
 | README claimed PostgreSQL + bcrypt, code used SQLite + PBKDF2 | Docs now match code: **SQLite** (zero setup) + **PBKDF2-HMAC-SHA256**. PostgreSQL still supported by changing one line in `.env`. |
 | `MoodSubmit.student_id` was required, breaking anonymous/demo flow | `student_id` is now optional — taken from JWT if logged in, or passed directly for demo mode. |
-| Only 3 roles handled (`student`/`admin`/`advisor`) | Now 5 roles: `student`, `counselor`, `advisor`, `admin`, `management` — validated everywhere via `VALID_ROLES`. |
+| Only 3 roles handled (`student`/`admin`/`counselor`) | Now 4 roles: `student`, `counselor`, `admin`, `management` — validated everywhere via `VALID_ROLES`. |
 | No Counselor-specific endpoints | New `app/api/routes/counselor.py`: high-risk alerts + full CRUD guidance notes. |
 | No way to know your own role from frontend | New `GET /auth/me`. |
 | Admin could only list/delete users | Full CRUD: `GET/POST/PUT/DELETE /api/admin/users`. |
@@ -99,7 +99,6 @@ This creates:
 |---|---|---|
 | Student | student@aee.edu | demo1234 |
 | Counselor | counselor@aee.edu | demo1234 |
-| Advisor | advisor@aee.edu | demo1234 |
 | Admin | admin@aee.edu | demo1234 |
 | University Management | management@aee.edu | demo1234 |
 
@@ -115,7 +114,7 @@ uvicorn main:app --reload
 
 ## Role-Based Access Summary
 
-| Endpoint | student | counselor/advisor | admin | management |
+| Endpoint | student | counselor | admin | management |
 |---|---|---|---|---|
 | `POST /mood/submit` | ✅ (own data) | ✅ | ✅ | ❌ |
 | `GET /mood/history` | ✅ (own only) | ✅ (any) | ✅ (any) | ❌ |

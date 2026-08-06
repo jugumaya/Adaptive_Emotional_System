@@ -4,7 +4,6 @@ Shared FastAPI dependencies for authentication and role-based access control (RB
 Roles supported across the AEE platform:
     student     - submits mood check-ins, views own history
     counselor   - views alerts/trends, submits guidance notes
-    advisor     - same access as counselor (alias role)
     admin       - full system access, user management
     management  - university management, read-only aggregated reports
 """
@@ -17,7 +16,7 @@ from app.core.security import decode_token, JWTError
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
-VALID_ROLES = ["student", "counselor", "advisor", "admin", "management"]
+VALID_ROLES = ["student", "counselor", "admin", "management"]
 
 
 def get_current_user(

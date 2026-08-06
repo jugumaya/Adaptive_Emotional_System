@@ -1,5 +1,5 @@
 """
-Counselor / Advisor routes — NEW module.
+Counselor routes — view alerts and manage guidance notes.
 
 Provides:
   - GET  /counselor/alerts          : anonymized high-risk student alerts
@@ -8,7 +8,7 @@ Provides:
   - PUT  /counselor/guidance/{id}    : edit own guidance note (CRUD: Update)
   - DELETE /counselor/guidance/{id}  : delete own guidance note (CRUD: Delete)
 
-Access: counselor, advisor, admin (admin can oversee everything).
+Access: counselor, admin (admin can oversee everything).
 """
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
@@ -23,7 +23,7 @@ from app.core.deps import require_roles
 
 router = APIRouter(prefix="/counselor", tags=["Counselor"])
 
-ALLOWED = ("counselor", "advisor", "admin")
+ALLOWED = ("counselor", "admin")
 
 
 # ---------- ALERTS (Read) ----------

@@ -165,7 +165,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
         <div class="s-row"><span class="s-l">Average mood score</span><span class="s-v" id="mo-d-avg">—</span></div>
         <div class="s-row"><span class="s-l">High-risk flags raised</span><span class="s-v" style="color:var(--red)" id="mo-d-high">—</span></div>
         <div class="s-row"><span class="s-l">Micro-interventions delivered</span><span class="s-v" id="mo-d-iv">—</span></div>
-        <div class="s-row"><span class="s-l">Counselors/Advisors active</span><span class="s-v" id="mo-d-couns">—</span></div>
+        <div class="s-row"><span class="s-l">Counselors active</span><span class="s-v" id="mo-d-couns">—</span></div>
         <div class="s-row"><span class="s-l">System uptime</span><span class="s-v" style="color:var(--green)" id="mo-d-uptime">—</span></div>
         <div class="s-row"><span class="s-l">Data compliance</span><span class="s-v" style="color:var(--green)" id="mo-d-compliance">—</span></div>
         <div class="s-row"><span class="s-l">Report generated</span><span class="s-v" id="mo-d-gen">—</span></div>
@@ -231,7 +231,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 
 <div class="toast" id="toast"></div>
 <script>
-const API   = 'http://localhost:8000';
+// Use same origin so the page works on any host/port without CORS.
+const API   = window.location.origin;
 const token = () => localStorage.getItem('aee_token');
 if (!token()) window.location.href = '/ui/login';
 
@@ -300,13 +301,13 @@ async function loadMonthly() {
     document.getElementById('mo-subs').textContent   = r.monthly_submissions;
     document.getElementById('mo-avg').textContent    = r.monthly_average_mood;
     document.getElementById('mo-high').textContent   = r.high_risk_flags;
-    document.getElementById('mo-couns').textContent  = r.counselors_advisors_active;
+    document.getElementById('mo-couns').textContent  = r.counselors_active;
     document.getElementById('mo-period').textContent = r.period;
     document.getElementById('mo-d-subs').textContent  = r.monthly_submissions;
     document.getElementById('mo-d-avg').textContent   = r.monthly_average_mood+'/10';
     document.getElementById('mo-d-high').textContent  = r.high_risk_flags+' students';
     document.getElementById('mo-d-iv').textContent    = r.interventions_delivered;
-    document.getElementById('mo-d-couns').textContent = r.counselors_advisors_active;
+    document.getElementById('mo-d-couns').textContent = r.counselors_active;
     document.getElementById('mo-d-uptime').textContent = r.system_uptime_percent+'%';
     document.getElementById('mo-d-compliance').textContent = r.data_compliance;
     document.getElementById('mo-d-gen').textContent  = new Date(r.generated_at).toLocaleString('en-BD');

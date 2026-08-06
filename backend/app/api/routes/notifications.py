@@ -1,5 +1,5 @@
 """
-Notification routes — for counselors, advisors, and admins.
+Notification routes — for counselors and admins.
 
 Notifications are auto-created when a HIGH-risk mood is submitted.
 
@@ -22,7 +22,7 @@ from app.core.deps import require_roles
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
-ALLOWED = ("counselor", "advisor", "admin")
+ALLOWED = ("counselor", "admin")
 
 
 class NotificationOut(BaseModel):
@@ -63,7 +63,7 @@ def count_unread(
         db.query(Notification)
         .filter(
             Notification.recipient_role == current_user.role,
-            Notification.is_read == False,
+            Notification.is_read.is_(False),
         )
         .count()
     )
@@ -99,7 +99,7 @@ def mark_all_read(
 ):
     db.query(Notification).filter(
         Notification.recipient_role == current_user.role,
-        Notification.is_read == False,
+        Notification.is_read.is_(False),
     ).update({"is_read": True})
     db.commit()
     return {"message": "All notifications marked as read."}
